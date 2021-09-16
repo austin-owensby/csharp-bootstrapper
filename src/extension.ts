@@ -39,9 +39,7 @@ export function activate(context: vscode.ExtensionContext) {
 				pathSplit[pathSplit.length - 1] = outputFilename;
 				path = pathSplit.join("/");
 	
-				// Generate the file contents
-				let fileContents = `export interface I${className} {\n`;
-				fileContents += "}\n";
+				const fileContents = generateTypescriptClass(className, textAfterClass);
 	
 				try {
 					fs.writeFileSync(path, fileContents);
@@ -66,5 +64,29 @@ export function activate(context: vscode.ExtensionContext) {
 	context.subscriptions.push(disposable);
 }
 
-// this method is called when your extension is deactivated
 export function deactivate() {}
+
+
+function generateTypescriptClass(className: string, text: string): string {
+	let fileContents = `export interface I${className} {\n`;
+
+
+
+	fileContents += `}
+
+export class ${className}Dto implements I${className} {
+`;
+
+
+
+	fileContents += `}
+
+export class ${className} extends ${className}Dto {
+`;
+
+
+
+	fileContents += "}\n";
+
+	return fileContents;
+}
