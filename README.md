@@ -16,6 +16,14 @@ For example if there is an image subfolder under your extension project workspac
 
 If you have any requirements or dependencies, add a section describing those and how to install and configure them.
 
+## Contribution
+
+### Environment Setup
+How do we set up the environement?
+### Conventions
+What coding conventions?
+### Testing
+How to test the extension?
 ## Extension Settings
 
 Include if your extension adds any VS Code settings through the `contributes.configuration` extension point.
@@ -34,6 +42,10 @@ Calling out known issues can help limit users opening duplicate issues against y
 ## Release Notes
 
 Users appreciate release notes as you update your extension.
+
+### 0.0
+
+Initial commits
 
 ### 1.0.0
 
