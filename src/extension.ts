@@ -2,7 +2,7 @@ import * as vscode from 'vscode';
 import * as fs from 'fs';
 
 export function activate(context: vscode.ExtensionContext) {
-	let disposable = vscode.commands.registerCommand("test-extension.convertModel", () => {
+	let disposable = vscode.commands.registerCommand("csharp-bootstrapper.convertModel", () => {
 		try{
 			// Get the active text editor
 			const editor = vscode.window.activeTextEditor;

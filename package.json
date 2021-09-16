@@ -1,6 +1,6 @@
 {
-	"name": "test-extension",
-	"displayName": "Test Extension",
+	"name": "csharp-bootstrapper",
+	"displayName": "C# Bootstrapper",
 	"description": "",
 	"version": "0.0.1",
 	"engines": {
@@ -10,37 +10,47 @@
 		"Other"
 	],
 	"activationEvents": [
-		"onCommand:test-extension.convertModel"
+		"onCommand:csharp-bootstrapper.convertModel"
 	],
 	"main": "./out/extension.js",
 	"contributes": {
 		"viewsContainers": {
 			"activitybar": [
 				{
-				"id": "package-explorer",
-				"title": "Package Explorer",
-				"icon": "resources/icon.svg"
+					"id": "csharp-bootstrapper",
+					"title": "C# Bootstrapper",
+					"icon": "resources/icon.svg"
 				}
 			]
 		},
 		"views": {
-			"package-explorer": [
+			"csharp-bootstrapper": [
 				{
-					"id": "package-dependencies",
-					"name": "Dependencies"
+					"id": "csharp-bootstrapper-options",
+					"name": "Bootstrapper Options"
 				}
 			]
 		},
+		"configuration": {
+			"title": "C# Bootstrapper",
+			"properties": {
+				"C# Bootstrapper.frontendModelDirectory": {
+					"type": "string",
+					"default": "",
+					"description": "The directory that frontend typescript models should be added."
+				}
+			}
+		},
 		"commands": [
 			{
-				"command": "test-extension.convertModel",
+				"command": "csharp-bootstrapper.convertModel",
 				"title": "Convert to Typescript"
 			}
 		],
 		"menus": {
 			"editor/context": [
 				{
-					"command": "test-extension.convertModel",
+					"command": "csharp-bootstrapper.convertModel",
 					"when": "editorLangId == csharp"
 				}
 			]
