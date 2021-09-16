@@ -1,37 +1,69 @@
-// The module 'vscode' contains the VS Code extensibility API
-// Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
+import * as fs from 'fs';
 
-// this method is called when your extension is activated
-// your extension is activated the very first time the command is executed
 export function activate(context: vscode.ExtensionContext) {
+	let disposable = vscode.commands.registerCommand("test-extension.convertModel", () => {
+		try{
+			// Get the active text editor
+			const editor = vscode.window.activeTextEditor;
 	
-	// Use the console to output diagnostic information (console.log) and errors (console.error)
-	// This line of code will only be executed once when your extension is activated
-	console.log('Congratulations, your extension "test-extension" is now active!');
-
-	// The command has been defined in the package.json file
-	// Now provide the implementation of the command with registerCommand
-	// The commandId parameter must match the command field in package.json
-	let disposable = vscode.commands.registerCommand('test-extension.helloWorld', () => {
-		// The code you place here will be executed every time your command is executed
-		// Display a message box to the user
-		vscode.window.showInformationMessage('Hello World from VSCode!');
+			if (editor) {
+				let document = editor.document;
+	
+				// Get the document text
+				const documentText = document.getText();
+	
+				// Get class name from the document
+				const documentTextArray = documentText.split("class ");
+				if(documentTextArray.length < 1){
+					vscode.window.showErrorMessage("No class name detected.");
+					return;
+				}
+	
+				const textAfterClass = documentText.split("class ")[1];
+				let className = textAfterClass.split(" ")[0].split(":")[0];
+	
+				// Generate the filename
+				const lowercaseClassName = className.charAt(0).toLowerCase() + className.slice(1);
+	
+				if(!lowercaseClassName){
+					vscode.window.showErrorMessage("No class name detected.");
+					return;
+				}
+	
+				const outputFilename = `${lowercaseClassName}.ts`;
+	
+				// Generate the file path
+				let path = document.uri.path;
+				let pathSplit = path.split("/");
+				pathSplit[pathSplit.length - 1] = outputFilename;
+				path = pathSplit.join("/");
+	
+				// Generate the file contents
+				let fileContents = `export interface I${className} {\n`;
+				fileContents += "}\n";
+	
+				try {
+					fs.writeFileSync(path, fileContents);
+					// file written successfully, navigate to it
+					let newUri = document.uri.with({ path: path });
+					vscode.window.showTextDocument(newUri, { preview: false });
+				} catch (e) {
+					vscode.window.showErrorMessage("Error creating typescript file.");
+					console.error(e);
+				}
+			}
+			else{
+				vscode.window.showErrorMessage("No active file.");
+			}
+		}
+		catch (e) {
+			vscode.window.showErrorMessage("An unknown error occured.");
+			console.error(e);
+		}
 	});
 
 	context.subscriptions.push(disposable);
-
-	// The command has been defined in the package.json file
-	// Now provide the implementation of the command with registerCommand
-	// The commandId parameter must match the command field in package.json
-	let disposable2 = vscode.commands.registerCommand('test-extension.currentTime', () => {
-		// The code you place here will be executed every time your command is executed
-		// Display a message box to the user
-		const date = new Date(Date.now());
-		vscode.window.showWarningMessage(date.toLocaleTimeString());
-	});
-
-	context.subscriptions.push(disposable2);
 }
 
 // this method is called when your extension is deactivated

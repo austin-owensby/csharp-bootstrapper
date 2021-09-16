@@ -10,21 +10,24 @@
 		"Other"
 	],
 	"activationEvents": [
-		"onCommand:test-extension.helloWorld",
-		"onCommand:test-extension.currentTime"
+		"onCommand:test-extension.convertModel"
 	],
 	"main": "./out/extension.js",
 	"contributes": {
 		"commands": [
 			{
-				"command": "test-extension.helloWorld",
-				"title": "Test Output"
-			},
-			{
-				"command": "test-extension.currentTime",
-				"title": "Current Time"
+				"command": "test-extension.convertModel",
+				"title": "Convert to Typescript"
 			}
 		],
+		"menus": {
+			"editor/context": [
+				{
+					"command": "test-extension.convertModel",
+					"when": "editorLangId == csharp"
+				}
+			]
+		}
 	},
 	"scripts": {
 		"vscode:prepublish": "npm run compile",
