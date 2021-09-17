@@ -26,11 +26,17 @@
 		"views": {
 			"csharp-bootstrapper": [
 				{
-					"id": "csharp-bootstrapper-options",
-					"name": "Bootstrapper Options"
+					"id": "options",
+					"name": "Options"
 				}
 			]
 		},
+		"viewsWelcome": [
+			{
+				"view": "options",
+				"contents": "I would like to eventually be able to edit configurations here. I haven't found anything on how to navgiate to the extension settings automatically. I wonder if I should just make a web view that just edits the settings.json directly? IDK yet."
+			}
+		],
 		"configuration": {
 			"title": "C# Bootstrapper",
 			"properties": {
