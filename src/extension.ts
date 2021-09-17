@@ -21,7 +21,7 @@ export function activate(context: vscode.ExtensionContext) {
 				}
 	
 				const textAfterClass = documentText.split("class ")[1];
-				let className = textAfterClass.split(" ")[0].split(":")[0];
+				let className = textAfterClass.split(" ")[0].split(":")[0].trim();
 	
 				// Generate the filename
 				const lowercaseClassName = className.charAt(0).toLowerCase() + className.slice(1);
@@ -82,11 +82,15 @@ export class ${className}Dto implements I${className} {
 	fileContents += `}
 
 export class ${className} extends ${className}Dto {
+	constructor(dto? : ${className}Dto){
+		super();
+
+		if (dto) {
+			Object.assign(this, dto);
+		}
+	}
+}
 `;
-
-
-
-	fileContents += "}\n";
 
 	return fileContents;
 }
