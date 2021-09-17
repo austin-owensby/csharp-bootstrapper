@@ -2,8 +2,13 @@
 	"name": "csharp-bootstrapper",
 	"displayName": "C# Bootstrapper",
 	"publisher": "austinowensby",
-	"description": "",
+	"description": "Bootstraps a basic CRUD API based off of a C# model.",
+	"icon": "resources/ajax.png",
 	"version": "0.0.1",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/austin-owensby/csharp-bootstrapper"
+	},
 	"engines": {
 		"vscode": "^1.60.0"
 	},
