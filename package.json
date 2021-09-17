@@ -1,6 +1,7 @@
 {
 	"name": "csharp-bootstrapper",
 	"displayName": "C# Bootstrapper",
+	"publisher": "austinowensby",
 	"description": "",
 	"version": "0.0.1",
 	"engines": {
