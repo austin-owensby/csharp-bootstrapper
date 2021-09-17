@@ -15,11 +15,13 @@ For example if there is an image subfolder under your extension project workspac
 ## Requirements
 
 If you have any requirements or dependencies, add a section describing those and how to install and configure them.
+1. Node package manager
 
 ## Contribution
 
 ### Environment Setup
 How do we set up the environement?
+1. Run `npm install`
 ### Conventions
 What coding conventions?
 ### Testing
