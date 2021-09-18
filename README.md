@@ -36,6 +36,10 @@ WIP extension :)
 
 ## Release Notes
 
-### 0.0
+### 0.0.0
 
 Initial testing of publishing the extension
+
+### 0.0.1 - 0.0.4
+
+Scaffolding out of project. Added simple view and command to generate tpyescript template at a configured path.

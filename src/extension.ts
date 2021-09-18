@@ -1,8 +1,9 @@
 import * as vscode from 'vscode';
 import * as fs from 'fs';
+import * as pluralize from 'pluralize';
 
 export function activate(context: vscode.ExtensionContext) {
-	let rootPath = '';
+	let rootPath: string = '';
 	if(vscode.workspace.workspaceFolders !== undefined){
 		rootPath = vscode.workspace.workspaceFolders[0].uri.path;
 	}
@@ -16,57 +17,39 @@ export function activate(context: vscode.ExtensionContext) {
 	}));
 
 	// Generate a Typescript file based on the current C# model
-	context.subscriptions.push(vscode.commands.registerCommand('csharp-bootstrapper.convertModel', () => {
-		try{
-			// Get the active text editor
-			const editor = vscode.window.activeTextEditor;
-	
-			if (editor) {
-				let document = editor.document;
-	
+	context.subscriptions.push(vscode.commands.registerCommand('csharp-bootstrapper.convertModel', (uri:vscode.Uri) => {
+		try{			
+			if (uri) {	
 				// Get the document text
-				const documentText = document.getText();
-	
-				// Get class name from the documen\
-				const documentTextArray = documentText.split('class ');
-				if(documentTextArray.length < 1){
-					vscode.window.showErrorMessage('No class name detected.');
-					return;
-				}
-	
-				const textAfterClass = documentText.split('class ')[1];
-				let className = textAfterClass.split(' ')[0].split(':')[0].trim();
-	
-				// Generate the filename
-				const lowercaseClassName = className.charAt(0).toLowerCase() + className.slice(1);
+				const documentText: string = fs.readFileSync(uri.path).toString();
+
+				const className: string = getClassName(documentText);
+				const lowercaseClassName: string = getLowerCaseClassName(className);
 	
 				if(!lowercaseClassName){
-					vscode.window.showErrorMessage('No class name detected.');
+					vscode.window.showErrorMessage('C# Bootstrapper: No class name detected.');
 					return;
 				}
-	
-				const outputFilename = `${lowercaseClassName}.ts`;
-	
+		
 				// Generate the file path
-				const path = `${rootPath}/${vscode.workspace.getConfiguration().get('csharp-bootstrapper.frontendModelDirectory')}/${outputFilename}`;
-				const fileContents = generateTypescriptClass(className, textAfterClass);
+				const path: string = `${rootPath}/${vscode.workspace.getConfiguration().get('csharp-bootstrapper.frontendModelDirectory')}/${className}.ts`;
+				const fileContents: string = generateTypescriptClass(className);
 	
 				try {
 					fs.writeFileSync(path, fileContents);
 					// file written successfully, navigate to it
-					let newUri = document.uri.with({ path: path });
-					vscode.window.showTextDocument(newUri, { preview: false });
+					vscode.window.showTextDocument(vscode.Uri.file(path), { preview: false });
 				} catch (e) {
-					vscode.window.showErrorMessage('Error creating typescript file.');
+					vscode.window.showErrorMessage('C# Bootstrapper: Error creating typescript file.');
 					console.error(e);
 				}
 			}
 			else{
-				vscode.window.showErrorMessage('No active file.');
+				vscode.window.showErrorMessage('C# Bootstrapper: No file found.');
 			}
 		}
 		catch (e) {
-			vscode.window.showErrorMessage('An unknown error occured.');
+			vscode.window.showErrorMessage('C# Bootstrapper: An unknown error occured.');
 			console.error(e);
 		}
 	}));
@@ -75,7 +58,7 @@ export function activate(context: vscode.ExtensionContext) {
 export function deactivate() {}
 
 // Helper functions
-function generateTypescriptClass(className: string, text: string): string {
+function generateTypescriptClass(className: string): string {
 	let fileContents = `export interface I${className} {\n`;
 
 
@@ -101,4 +84,19 @@ export class ${className} extends ${className}Dto {
 `;
 
 	return fileContents;
+}
+
+function getClassName(documentText: string): string{
+	const documentTextArray: string[] = documentText.split('class ');
+	if(documentTextArray.length < 1){
+		vscode.window.showErrorMessage('No class name detected.');
+		return '';
+	}
+
+	const textAfterClass: string = documentText.split('class ')[1];
+	return textAfterClass.split(' ')[0].split(':')[0].trim();
+}
+
+function getLowerCaseClassName(className: string): string{
+	return className.charAt(0).toLowerCase() + className.slice(1);
 }
