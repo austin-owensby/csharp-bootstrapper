@@ -26,8 +26,7 @@
 	],
 	"activationEvents": [
 		"onCommand:csharp-bootstrapper.convertModel",
-		"onCommand:csharp-bootstrapper.settings",
-		"onCommand:csharp-bootstrapper.globalSettings"
+		"onCommand:csharp-bootstrapper.settings"
 	],
 	"main": "./out/extension.js",
 	"contributes": {
@@ -51,7 +50,7 @@
 		"viewsWelcome": [
 			{
 				"view": "options",
-				"contents": "Welcome to C# Bootstrapper!\n Click the button below to navigate to the configuration settings for your project.\nFile paths are relative to the workspace folder\n[Workspace Settings](command:csharp-bootstrapper.settings)\n[Global Settings](command:csharp-bootstrapper.globalSettings)"
+				"contents": "Welcome to C# Bootstrapper!\n Click the button below to navigate to the configuration settings for your project.\nFile paths are relative to the workspace folder.\n[Settings](command:csharp-bootstrapper.settings)"
 			}
 		],
 		"configuration": [
@@ -74,10 +73,6 @@
 			{
 				"command": "csharp-bootstrapper.settings",
 				"title": "C# Boostrapper Extension Workplace Settings"
-			},
-			{
-				"command": "csharp-bootstrapper.gloablSettings",
-				"title": "C# Boostrapper Extension Global Settings"
 			}
 		],
 		"menus": {

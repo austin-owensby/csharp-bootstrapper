@@ -7,6 +7,7 @@ export function activate(context: vscode.ExtensionContext) {
 		rootPath = vscode.workspace.workspaceFolders[0].uri.path;
 	}
 
+	// Navigate to the Workspace's settings
 	context.subscriptions.push(vscode.commands.registerCommand('csharp-bootstrapper.settings', () => {
 		// For some reason this is really finikey and the only reliable way to trigger this
 		vscode.commands.executeCommand('workbench.action.openWorkspaceSettings');
@@ -14,10 +15,7 @@ export function activate(context: vscode.ExtensionContext) {
 		vscode.commands.executeCommand('workbench.action.openWorkspaceSettings');
 	}));
 
-	context.subscriptions.push(vscode.commands.registerCommand('csharp-bootstrapper.globalSettings', () => {
-		vscode.commands.executeCommand('workbench.action.openSettings', 'C# Bootstrapper');
-	}));
-
+	// Generate a Typescript file based on the current C# model
 	context.subscriptions.push(vscode.commands.registerCommand('csharp-bootstrapper.convertModel', () => {
 		try{
 			// Get the active text editor
@@ -76,7 +74,7 @@ export function activate(context: vscode.ExtensionContext) {
 
 export function deactivate() {}
 
-
+// Helper functions
 function generateTypescriptClass(className: string, text: string): string {
 	let fileContents = `export interface I${className} {\n`;
 
