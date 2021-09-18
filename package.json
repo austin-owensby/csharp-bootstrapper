@@ -15,8 +15,19 @@
 	"categories": [
 		"Other"
 	],
+	"keyword":[
+		"C#",
+		"Bootstrapper",
+		"CRUD",
+		"Typescript",
+		"API",
+		"csharp",
+		"ts"
+	],
 	"activationEvents": [
-		"onCommand:csharp-bootstrapper.convertModel"
+		"onCommand:csharp-bootstrapper.convertModel",
+		"onCommand:csharp-bootstrapper.settings",
+		"onCommand:csharp-bootstrapper.globalSettings"
 	],
 	"main": "./out/extension.js",
 	"contributes": {
@@ -40,23 +51,33 @@
 		"viewsWelcome": [
 			{
 				"view": "options",
-				"contents": "I would like to eventually be able to edit configurations here. I haven't found anything on how to navgiate to the extension settings automatically. I wonder if I should just make a web view that just edits the settings.json directly? IDK yet."
+				"contents": "Welcome to C# Bootstrapper!\n Click the button below to navigate to the configuration settings for your project.\nFile paths are relative to the workspace folder\n[Workspace Settings](command:csharp-bootstrapper.settings)\n[Global Settings](command:csharp-bootstrapper.globalSettings)"
 			}
 		],
-		"configuration": {
-			"title": "C# Bootstrapper",
-			"properties": {
-				"C# Bootstrapper.frontendModelDirectory": {
-					"type": "string",
-					"default": "",
-					"description": "The directory that frontend typescript models should be added."
+		"configuration": [
+			{
+				"title": "C# Bootstrapper",
+				"properties": {
+					"csharp-bootstrapper.frontendModelDirectory": {
+						"type": "string",
+						"default": "",
+						"description": "The directory that frontend typescript models should be added."
+					}
 				}
 			}
-		},
+		],
 		"commands": [
 			{
 				"command": "csharp-bootstrapper.convertModel",
 				"title": "Convert to Typescript"
+			},
+			{
+				"command": "csharp-bootstrapper.settings",
+				"title": "C# Boostrapper Extension Workplace Settings"
+			},
+			{
+				"command": "csharp-bootstrapper.gloablSettings",
+				"title": "C# Boostrapper Extension Global Settings"
 			}
 		],
 		"menus": {

@@ -2,7 +2,27 @@ import * as vscode from 'vscode';
 import * as fs from 'fs';
 
 export function activate(context: vscode.ExtensionContext) {
-	let disposable = vscode.commands.registerCommand("csharp-bootstrapper.convertModel", () => {
+	let rootPath = '';
+	if(vscode.workspace.workspaceFolders !== undefined){
+		rootPath = vscode.workspace.workspaceFolders[0].uri.path;
+	}
+
+	let disposable = vscode.commands.registerCommand('csharp-bootstrapper.settings', () => {
+		// For some reason this is really finikey and the only reliable way to trigger this
+		vscode.commands.executeCommand('workbench.action.openWorkspaceSettings');
+		vscode.commands.executeCommand('workbench.action.openSettings', 'C# Bootstrapper');
+		vscode.commands.executeCommand('workbench.action.openWorkspaceSettings');
+	});
+
+	context.subscriptions.push(disposable);
+
+	let disposable2 = vscode.commands.registerCommand('csharp-bootstrapper.globalSettings', () => {
+		vscode.commands.executeCommand('workbench.action.openSettings', 'C# Bootstrapper');
+	});
+
+	context.subscriptions.push(disposable2);
+
+	let disposable3 = vscode.commands.registerCommand('csharp-bootstrapper.convertModel', () => {
 		try{
 			// Get the active text editor
 			const editor = vscode.window.activeTextEditor;
@@ -13,32 +33,28 @@ export function activate(context: vscode.ExtensionContext) {
 				// Get the document text
 				const documentText = document.getText();
 	
-				// Get class name from the document
-				const documentTextArray = documentText.split("class ");
+				// Get class name from the documen\
+				const documentTextArray = documentText.split('class ');
 				if(documentTextArray.length < 1){
-					vscode.window.showErrorMessage("No class name detected.");
+					vscode.window.showErrorMessage('No class name detected.');
 					return;
 				}
 	
-				const textAfterClass = documentText.split("class ")[1];
-				let className = textAfterClass.split(" ")[0].split(":")[0].trim();
+				const textAfterClass = documentText.split('class ')[1];
+				let className = textAfterClass.split(' ')[0].split(':')[0].trim();
 	
 				// Generate the filename
 				const lowercaseClassName = className.charAt(0).toLowerCase() + className.slice(1);
 	
 				if(!lowercaseClassName){
-					vscode.window.showErrorMessage("No class name detected.");
+					vscode.window.showErrorMessage('No class name detected.');
 					return;
 				}
 	
 				const outputFilename = `${lowercaseClassName}.ts`;
 	
 				// Generate the file path
-				let path = document.uri.path;
-				let pathSplit = path.split("/");
-				pathSplit[pathSplit.length - 1] = outputFilename;
-				path = pathSplit.join("/");
-	
+				const path = `${rootPath}/${vscode.workspace.getConfiguration().get('csharp-bootstrapper.frontendModelDirectory')}/${outputFilename}`;
 				const fileContents = generateTypescriptClass(className, textAfterClass);
 	
 				try {
@@ -47,21 +63,21 @@ export function activate(context: vscode.ExtensionContext) {
 					let newUri = document.uri.with({ path: path });
 					vscode.window.showTextDocument(newUri, { preview: false });
 				} catch (e) {
-					vscode.window.showErrorMessage("Error creating typescript file.");
+					vscode.window.showErrorMessage('Error creating typescript file.');
 					console.error(e);
 				}
 			}
 			else{
-				vscode.window.showErrorMessage("No active file.");
+				vscode.window.showErrorMessage('No active file.');
 			}
 		}
 		catch (e) {
-			vscode.window.showErrorMessage("An unknown error occured.");
+			vscode.window.showErrorMessage('An unknown error occured.');
 			console.error(e);
 		}
 	});
 
-	context.subscriptions.push(disposable);
+	context.subscriptions.push(disposable3);
 }
 
 export function deactivate() {}
