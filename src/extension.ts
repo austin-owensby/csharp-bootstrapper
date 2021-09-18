@@ -7,22 +7,18 @@ export function activate(context: vscode.ExtensionContext) {
 		rootPath = vscode.workspace.workspaceFolders[0].uri.path;
 	}
 
-	let disposable = vscode.commands.registerCommand('csharp-bootstrapper.settings', () => {
+	context.subscriptions.push(vscode.commands.registerCommand('csharp-bootstrapper.settings', () => {
 		// For some reason this is really finikey and the only reliable way to trigger this
 		vscode.commands.executeCommand('workbench.action.openWorkspaceSettings');
 		vscode.commands.executeCommand('workbench.action.openSettings', 'C# Bootstrapper');
 		vscode.commands.executeCommand('workbench.action.openWorkspaceSettings');
-	});
+	}));
 
-	context.subscriptions.push(disposable);
-
-	let disposable2 = vscode.commands.registerCommand('csharp-bootstrapper.globalSettings', () => {
+	context.subscriptions.push(vscode.commands.registerCommand('csharp-bootstrapper.globalSettings', () => {
 		vscode.commands.executeCommand('workbench.action.openSettings', 'C# Bootstrapper');
-	});
+	}));
 
-	context.subscriptions.push(disposable2);
-
-	let disposable3 = vscode.commands.registerCommand('csharp-bootstrapper.convertModel', () => {
+	context.subscriptions.push(vscode.commands.registerCommand('csharp-bootstrapper.convertModel', () => {
 		try{
 			// Get the active text editor
 			const editor = vscode.window.activeTextEditor;
@@ -75,9 +71,7 @@ export function activate(context: vscode.ExtensionContext) {
 			vscode.window.showErrorMessage('An unknown error occured.');
 			console.error(e);
 		}
-	});
-
-	context.subscriptions.push(disposable3);
+	}));
 }
 
 export function deactivate() {}
