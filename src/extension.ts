@@ -4,8 +4,8 @@ import * as pluralize from 'pluralize';
 
 export function activate(context: vscode.ExtensionContext) {
 	let rootPath: string = '';
-	if(vscode.workspace.workspaceFolders !== undefined){
-		rootPath = vscode.workspace.workspaceFolders[0].uri.path;
+	if (vscode.workspace.workspaceFolders !== undefined) {
+		rootPath = vscode.workspace.workspaceFolders[0].uri.fsPath;
 	}
 
 	// Navigate to the Workspace's settings
@@ -17,24 +17,25 @@ export function activate(context: vscode.ExtensionContext) {
 	}));
 
 	// Generate a Typescript file based on the current C# model
-	context.subscriptions.push(vscode.commands.registerCommand('csharp-bootstrapper.convertModel', (uri:vscode.Uri) => {
-		try{			
-			if (uri) {	
+	context.subscriptions.push(vscode.commands.registerCommand('csharp-bootstrapper.convertModel', (uri: vscode.Uri) => {
+		try {
+			if (uri) {
 				// Get the document text
-				const documentText: string = fs.readFileSync(uri.path).toString();
+				const documentText: string = fs.readFileSync(uri.fsPath).toString();
 
 				const className: string = getClassName(documentText);
 				const lowercaseClassName: string = getLowerCaseClassName(className);
-	
-				if(!lowercaseClassName){
+
+				if (!lowercaseClassName) {
 					vscode.window.showErrorMessage('C# Bootstrapper: No class name detected.');
 					return;
 				}
-		
+
 				// Generate the file path
-				const path: string = `${rootPath}/${vscode.workspace.getConfiguration().get('csharp-bootstrapper.frontendModelDirectory')}/${className}.ts`;
+				let frontendTargetDirectory = vscode.workspace.getConfiguration().get('csharp-bootstrapper.frontendModelDirectory');
+				const path: string = `${rootPath}\\${frontendTargetDirectory ? `${frontendTargetDirectory}\\` : ''}${className}.ts`;
 				const fileContents: string = generateTypescriptClass(className);
-	
+
 				try {
 					fs.writeFileSync(path, fileContents);
 					// file written successfully, navigate to it
@@ -44,7 +45,7 @@ export function activate(context: vscode.ExtensionContext) {
 					console.error(e);
 				}
 			}
-			else{
+			else {
 				vscode.window.showErrorMessage('C# Bootstrapper: No file found.');
 			}
 		}
@@ -55,7 +56,7 @@ export function activate(context: vscode.ExtensionContext) {
 	}));
 }
 
-export function deactivate() {}
+export function deactivate() { }
 
 // Helper functions
 function generateTypescriptClass(className: string): string {
@@ -86,17 +87,19 @@ export class ${className} extends ${className}Dto {
 	return fileContents;
 }
 
-function getClassName(documentText: string): string{
+function getClassName(documentText: string): string {
+	// TODO: Replace with regex that covers all the cases
 	const documentTextArray: string[] = documentText.split('class ');
-	if(documentTextArray.length < 1){
+	if (documentTextArray.length <= 1) {
 		vscode.window.showErrorMessage('No class name detected.');
 		return '';
 	}
 
-	const textAfterClass: string = documentText.split('class ')[1];
-	return textAfterClass.split(' ')[0].split(':')[0].trim();
+	const textAfterClass: string = documentTextArray[1];
+	// TODO: Replace with regex that covers all the cases
+	return textAfterClass.trim().split(/\s+/)[0].split(':')[0].trim();
 }
 
-function getLowerCaseClassName(className: string): string{
+function getLowerCaseClassName(className: string): string {
 	return className.charAt(0).toLowerCase() + className.slice(1);
 }
