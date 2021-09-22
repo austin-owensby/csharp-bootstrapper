@@ -14,6 +14,10 @@ In addition it will have configurations allowing the API generation to be flexib
 
 ## Contribution
 
+* `csharp-bootstrapper.convert-model` Converts the C# model to a typescript model at the configured folder.
+
+* `csharp-bootstrapper.settings` Navigates to the extension settings.
+
 ### Environment Setup
 How do we set up the environement?
 1. Run `npm install`
@@ -28,7 +32,9 @@ How to test the extension?
 
 This extension contributes the following settings:
 
-* `frontendModelDirectory`: determines the destination route of the typescript model based on the C# model.
+### Frontend
+#### Model
+* `csharp-bootstrapper.frontend.model.directory` The directory that frontend typescript Model should be added.
 
 ## Known Issues
 
