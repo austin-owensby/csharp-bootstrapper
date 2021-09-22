@@ -26,7 +26,7 @@ export function activate(context: vscode.ExtensionContext) {
 
 				const className: string = getClassName(documentText);
 
-				if(!className) {
+				if (!className) {
 					vscode.window.showErrorMessage('C# Bootstrapper: No class name detected.');
 					return;
 				}
