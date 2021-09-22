@@ -25,7 +25,7 @@
 		"ts"
 	],
 	"activationEvents": [
-		"onCommand:csharp-bootstrapper.convertModel",
+		"onCommand:csharp-bootstrapper.convert-model",
 		"onCommand:csharp-bootstrapper.settings"
 	],
 	"main": "./out/extension.js",
@@ -57,7 +57,7 @@
 			{
 				"title": "C# Bootstrapper",
 				"properties": {
-					"csharp-bootstrapper.frontendModelDirectory": {
+					"csharp-bootstrapper.frontend.model.directory": {
 						"type": "string",
 						"default": "",
 						"description": "The directory that frontend typescript models should be added."
@@ -67,7 +67,7 @@
 		],
 		"commands": [
 			{
-				"command": "csharp-bootstrapper.convertModel",
+				"command": "csharp-bootstrapper.convert-model",
 				"title": "Convert to Typescript"
 			},
 			{
@@ -78,13 +78,13 @@
 		"menus": {
 			"editor/context": [
 				{
-					"command": "csharp-bootstrapper.convertModel",
+					"command": "csharp-bootstrapper.convert-model",
 					"when": "editorLangId == csharp"
 				}
 			],
 			"explorer/context": [
 				{
-					"command": "csharp-bootstrapper.convertModel",
+					"command": "csharp-bootstrapper.convert-model",
 					"when": "resourceLangId == csharp"
 				}
 			]

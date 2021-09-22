@@ -1,5 +1,6 @@
 import * as vscode from 'vscode';
 import * as fs from 'fs';
+import * as path from 'path';
 import * as pluralize from 'pluralize';
 
 export function activate(context: vscode.ExtensionContext) {
@@ -17,29 +18,29 @@ export function activate(context: vscode.ExtensionContext) {
 	}));
 
 	// Generate a Typescript file based on the current C# model
-	context.subscriptions.push(vscode.commands.registerCommand('csharp-bootstrapper.convertModel', (uri: vscode.Uri) => {
+	context.subscriptions.push(vscode.commands.registerCommand('csharp-bootstrapper.convert-model', (uri: vscode.Uri) => {
 		try {
 			if (uri) {
 				// Get the document text
 				const documentText: string = fs.readFileSync(uri.fsPath).toString();
 
 				const className: string = getClassName(documentText);
-				const lowercaseClassName: string = getLowerCaseClassName(className);
 
-				if (!lowercaseClassName) {
+				if (!className) {
 					vscode.window.showErrorMessage('C# Bootstrapper: No class name detected.');
 					return;
 				}
 
 				// Generate the file path
-				let frontendTargetDirectory = vscode.workspace.getConfiguration().get('csharp-bootstrapper.frontendModelDirectory');
-				const path: string = `${rootPath}\\${frontendTargetDirectory ? `${frontendTargetDirectory}\\` : ''}${className}.ts`;
+				const frontendTargetDirectory: string = vscode.workspace.getConfiguration().get('csharp-bootstrapper.frontend.model.directory', '');
+				const modelPath: string = path.join(rootPath, frontendTargetDirectory, `${className}.ts`);
+
 				const fileContents: string = generateTypescriptClass(className);
 
 				try {
-					fs.writeFileSync(path, fileContents);
+					fs.writeFileSync(modelPath, fileContents);
 					// file written successfully, navigate to it
-					vscode.window.showTextDocument(vscode.Uri.file(path), { preview: false });
+					vscode.window.showTextDocument(vscode.Uri.file(modelPath), { preview: false });
 				} catch (e) {
 					vscode.window.showErrorMessage('C# Bootstrapper: Error creating typescript file.');
 					console.error(e);
@@ -60,7 +61,7 @@ export function deactivate() { }
 
 // Helper functions
 function generateTypescriptClass(className: string): string {
-	let fileContents = `export interface I${className} {\n`;
+	let fileContents: string = `export interface I${className} {\n`;
 
 
 
