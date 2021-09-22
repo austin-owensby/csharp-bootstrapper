@@ -32,7 +32,7 @@ export function activate(context: vscode.ExtensionContext) {
 				}
 
 				// Generate the file path
-				const frontendTargetDirectory: string = vscode.workspace.getConfiguration().get('csharp-bootstrapper.frontend.model.directory') ?? '';
+				const frontendTargetDirectory: string = vscode.workspace.getConfiguration().get('csharp-bootstrapper.frontend.model.directory', '');
 				const modelPath: string = path.join(rootPath, frontendTargetDirectory, `${className}.ts`);
 
 				const fileContents: string = generateTypescriptClass(className);
@@ -61,7 +61,7 @@ export function deactivate() { }
 
 // Helper functions
 function generateTypescriptClass(className: string): string {
-	let fileContents = `export interface I${className} {\n`;
+	let fileContents: string = `export interface I${className} {\n`;
 
 
 
