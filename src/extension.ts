@@ -2,6 +2,7 @@ import * as vscode from 'vscode';
 import * as fs from 'fs';
 import * as path from 'path';
 import * as pluralize from 'pluralize';
+import { stringify } from 'querystring';
 
 export function activate(context: vscode.ExtensionContext) {
 	let rootPath: string = '';
@@ -24,26 +25,28 @@ export function activate(context: vscode.ExtensionContext) {
 				// Get the document text
 				const documentText: string = fs.readFileSync(uri.fsPath).toString();
 
-				const className: string = getClassName(documentText);
-
-				if (!className) {
+				const classNames = getClassName(documentText);
+				if (!classNames.length) {
 					vscode.window.showErrorMessage('C# Bootstrapper: No class name detected.');
 					return;
+
 				}
 
-				// Generate the file path
-				const frontendTargetDirectory: string = vscode.workspace.getConfiguration().get('csharp-bootstrapper.frontend.model.directory', '');
-				const modelPath: string = path.join(rootPath, frontendTargetDirectory, `${className}.ts`);
+				for (let className of classNames) {
+					// Generate the file path
+					const frontendTargetDirectory: string = vscode.workspace.getConfiguration().get('csharp-bootstrapper.frontend.model.directory', '');
+					const modelPath: string = path.join(rootPath, frontendTargetDirectory, `${className}.ts`);
 
-				const fileContents: string = generateTypescriptClass(className);
+					const fileContents: string = generateTypescriptClass(className);
 
-				try {
-					fs.writeFileSync(modelPath, fileContents);
-					// file written successfully, navigate to it
-					vscode.window.showTextDocument(vscode.Uri.file(modelPath), { preview: false });
-				} catch (e) {
-					vscode.window.showErrorMessage('C# Bootstrapper: Error creating typescript file.');
-					console.error(e);
+					try {
+						fs.writeFileSync(modelPath, fileContents);
+						// file written successfully, navigate to it
+						vscode.window.showTextDocument(vscode.Uri.file(modelPath), { preview: false });
+					} catch (e) {
+						vscode.window.showErrorMessage('C# Bootstrapper: Error creating typescript file.');
+						console.error(e);
+					}
 				}
 			}
 			else {
@@ -88,17 +91,9 @@ export class ${className} extends ${className}Dto {
 	return fileContents;
 }
 
-function getClassName(documentText: string): string {
-	// TODO: Replace with regex that covers all the cases
-	const documentTextArray: string[] = documentText.split('class ');
-	if (documentTextArray.length <= 1) {
-		vscode.window.showErrorMessage('No class name detected.');
-		return '';
-	}
-
-	const textAfterClass: string = documentTextArray[1];
-	// TODO: Replace with regex that covers all the cases
-	return textAfterClass.trim().split(/\s+/)[0].split(':')[0].trim();
+function getClassName(documentText: string): string[] {
+	let matches = documentText.matchAll(/public class (\w+)/g);
+	return Array.from(matches).map(matchArray => matchArray[1]).filter(match => match);
 }
 
 function getLowerCaseClassName(className: string): string {
