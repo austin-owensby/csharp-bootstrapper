@@ -26,7 +26,6 @@
 	],
 	"activationEvents": [
 		"onCommand:csharp-bootstrapper.convert-model",
-		"onCommand:csharp-bootstrapper.bootstrap-crud",
 		"onCommand:csharp-bootstrapper.settings"
 	],
 	"main": "./out/extension.js",
@@ -61,8 +60,7 @@
 					"csharp-bootstrapper.frontend.model.directory": {
 						"type": "string",
 						"default": "",
-						"description": "The directory that frontend typescript Model should be added."
-					},
+						"description": "The directory that frontend typescript models should be added."
 					}
 				}
 			}
@@ -82,13 +80,11 @@
 				{
 					"command": "csharp-bootstrapper.convert-model",
 					"when": "editorLangId == csharp"
-					"when": "editorLangId == csharp"
 				}
 			],
 			"explorer/context": [
 				{
 					"command": "csharp-bootstrapper.convert-model",
-					"when": "resourceLangId == csharp"
 					"when": "resourceLangId == csharp"
 				}
 			]
