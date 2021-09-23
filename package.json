@@ -26,6 +26,7 @@
 	],
 	"activationEvents": [
 		"onCommand:csharp-bootstrapper.convert-model",
+		"onCommand:csharp-bootstrapper.bootstrap-crud",
 		"onCommand:csharp-bootstrapper.settings"
 	],
 	"main": "./out/extension.js",
@@ -61,6 +62,36 @@
 						"type": "string",
 						"default": "",
 						"description": "The directory that frontend typescript models should be added."
+					},
+					"csharp-bootstrapper.backend.service.directory": {
+						"type": "string",
+						"default": "",
+						"description": "The directory that backend C# Service should be added."
+					},
+					"csharp-bootstrapper.backend.service.namespace": {
+						"type": "string",
+						"default": "",
+						"description": "The namespace of the backend C# Service."
+					},
+					"csharp-bootstrapper.backend.service.interface.directory": {
+						"type": "string",
+						"default": "",
+						"description": "The directory that backend C# Service Interface should be added."
+					},
+					"csharp-bootstrapper.backend.service.interface.namespace": {
+						"type": "string",
+						"default": "",
+						"description": "The namespace of the backend C# Service Interface."
+					},
+					"csharp-bootstrapper.backend.dbcontext.name": {
+						"type": "string",
+						"default": "DBContext",
+						"description": "The name of the Database Context class."
+					},
+					"csharp-bootstrapper.backend.dbcontext.namespace": {
+						"type": "string",
+						"default": "DBContext",
+						"description": "The namespace of the Database Context class."
 					}
 				}
 			}
@@ -69,6 +100,10 @@
 			{
 				"command": "csharp-bootstrapper.convert-model",
 				"title": "Convert to Typescript"
+			},
+			{
+				"command": "csharp-bootstrapper.bootstrap-crud",
+				"title": "Boostrap CRUD"
 			},
 			{
 				"command": "csharp-bootstrapper.settings",
@@ -80,11 +115,19 @@
 				{
 					"command": "csharp-bootstrapper.convert-model",
 					"when": "editorLangId == csharp"
+				},
+				{
+					"command": "csharp-bootstrapper.bootstrap-crud",
+					"when": "editorLangId == csharp"
 				}
 			],
 			"explorer/context": [
 				{
 					"command": "csharp-bootstrapper.convert-model",
+					"when": "resourceLangId == csharp"
+				},
+				{
+					"command": "csharp-bootstrapper.bootstrap-crud",
 					"when": "resourceLangId == csharp"
 				}
 			]
