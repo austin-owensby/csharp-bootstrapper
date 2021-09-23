@@ -136,36 +136,58 @@ export class ${className} extends ${className}Dto {
 }
 
 function generateBackendService(className: string, namespaceName: string): string {
-	const dbContextNamespace = vscode.workspace.getConfiguration().get('csharp-bootstrapper.backend.dbcontext.namespace', '');
-	let usingString = dbContextNamespace ? `using ${dbContextNamespace};\n` : '';
+	/* TODO
+	 * 1. Fix assumptions about namespace structure (described in interface function)
+	 * 2. Find the actual DB name in the DBContext
+	 * 		a. Even if there are multiple DBContexts we should be able to used the pased in DBContext class name. 
+	 * 			Maybe instead of having a DBContext name and namespace we should have a file path to it.
+	 * 		b. Need to determine what to do if the are multiple DBSets for 1 class
+	 * 3. Determine the Primary Key from the C# model
+	 * 4. Generate Request classes based on the C# model
+	 * 		a. Might need to add in a configruation on if we want to include children in the Request model
+	 * 5. Add exceptions for Not Found responses
+	 * 6. Will probably need to fix the assumption that we can just use Microsoft.EntityFrameworkCore as the DB context
+	*/
+	const dbContextNamespace: string = vscode.workspace.getConfiguration().get('csharp-bootstrapper.backend.dbcontext.namespace', '');
+	
+	const usings: string[] = ['AutoMapper', 'Microsoft.EntityFrameworkCore', 'System', 'System.Collections.Generic', 'System.Threading.Tasks'];
 
-	const dbContext = vscode.workspace.getConfiguration().get('csharp-bootstrapper.backend.dbcontext.name', 'DBContext');
+	if(dbContextNamespace){
+		usings.push(dbContextNamespace);
+	}
 
-	const serviceNamespace = vscode.workspace.getConfiguration().get('csharp-bootstrapper.backend.service.namespace', '');
-	const serviceInterfaceNamespace = vscode.workspace.getConfiguration().get('csharp-bootstrapper.backend.service.interface.namespace', '');
+	const dbContext: string = vscode.workspace.getConfiguration().get('csharp-bootstrapper.backend.dbcontext.name', 'DBContext');
+
+	const serviceNamespace: string = vscode.workspace.getConfiguration().get('csharp-bootstrapper.backend.service.namespace', '');
+	const serviceInterfaceNamespace: string = vscode.workspace.getConfiguration().get('csharp-bootstrapper.backend.service.interface.namespace', '');
 
 	// Only include the class namespace if its not in the service namespace's hierarchy
 	if(!serviceNamespace.startsWith(namespaceName)){
-		usingString += `using ${namespaceName};\n`;
+		usings.push(namespaceName);
 	}
 
 	if(!serviceNamespace.startsWith(serviceInterfaceNamespace)){
-		usingString += `using ${serviceInterfaceNamespace};\n`;
+		usings.push(serviceInterfaceNamespace);
 	}
 
-	let serviceContents = `using AutoMapper;
-using System;
-using System.Threading.Tasks;
-${usingString}
-`;
+	// Sort and remove duplicate usings
+	let serviceContents: string = usings.filter((v, i, a) => a.indexOf(v) === i).sort().map(u => `using ${u};`).join('\n') + '\n\n';
 
-	const classContent = `public class ${className}Service: I${className}Service {
+	const classContent: string = `public class ${className}Service: I${className}Service {
 	private readonly IMapper mapper;
 	private readonly ${dbContext} context;
 
 	public ${className}Service(IMapper mapper, ${dbContext} context){
 		this.mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
 		this.context = context ?? throw new ArgumentNullException(nameof(context));
+	}
+
+	public async Task<${className}> Get${className}(int id){
+		return await context.${pluralize(className)}.FindAsync(id);
+	}
+
+	public async Task<List<${className}>> Get${pluralize(className)}(){
+		return await context.${pluralize(className)}.ToListAsync();
 	}
 
 	public async Task<${className}> Create${className}(Create${className}Request request){
@@ -177,9 +199,31 @@ ${usingString}
 
 		return ${getLowerCaseClassName(className)};
 	}
+
+	public async Task<${className}> Update${className}(Update${className}Request request){
+		${className} ${getLowerCaseClassName(className)} = await context.${pluralize(className)}.FindAsync(request.Id);
+
+		${getLowerCaseClassName(className)} = mapper.Map<${className}>(request);
+
+		await context.SaveChangesAsync();
+
+		return ${getLowerCaseClassName(className)};
+	}
+
+	public async Task Delete${className}(int id){
+		${className} ${getLowerCaseClassName(className)} = await context.${pluralize(className)}.FindAsync(id);
+
+		context.${pluralize(className)}.Remove(${getLowerCaseClassName(className)});
+
+		await context.SaveChangesAsync();
+	}
 }
 
 public class Create${className}Request {
+
+}
+
+public class Update${className}Request {
 
 }`;
 
@@ -197,28 +241,39 @@ public class Create${className}Request {
 }
 
 function generateBackendServiceInterface(className: string, namespaceName: string){
-	let usingString = '';
+	let usings: string[] = ['System.Threading.Tasks', 'System.Collections.Generic'];
 
-	const serviceNamespace = vscode.workspace.getConfiguration().get('csharp-bootstrapper.backend.service.namespace', '');
-	const serviceInterfaceNamespace = vscode.workspace.getConfiguration().get('csharp-bootstrapper.backend.service.interface.namespace', '');
-
+	const serviceNamespace: string = vscode.workspace.getConfiguration().get('csharp-bootstrapper.backend.service.namespace', '');
+	const serviceInterfaceNamespace: string = vscode.workspace.getConfiguration().get('csharp-bootstrapper.backend.service.interface.namespace', '');
+	
+	/* TODO, this would fail on the example
+	 * Service Namespace: Project.Folder.Service
+	 * Interface Namespace: Project.Folder.ServiceInterface
+	 * I think I would need to check if the next character after the match:
+	 * 		1. Does not exist
+	 * 		2. Is a period
+	 * Other cases may exist
+	 */
 	// Only include the class namespace if its not in the service interface namespace's hierarchy
 	if(!serviceInterfaceNamespace.startsWith(namespaceName)){
-		usingString += `using ${namespaceName};\n`;
+		usings.push(namespaceName);
 	}
 
 	// Only include the service namespace if its not in the service interface namespace's hierarchy
 	if(!serviceInterfaceNamespace.startsWith(serviceNamespace)){
-		usingString += `using ${serviceNamespace};\n`;
+		usings.push(serviceNamespace);
 	}
 
-	const interfaceContent = `public interface I${className}Service{
+	const interfaceContent: string = `public interface I${className}Service{
+	public Task<${className}> Get${className}(int id);
+	public Task<List<${className}>> Get${pluralize(className)}();
 	public Task<${className}> Create${className}(Create${className}Request request);
+	public Task<${className}> Update${className}(Update${className}Request request);
+	public Task Delete${className}(int id);
 }`;
 
-	let fileContents = `using System.Threading.Tasks;
-${usingString}
-`;
+	// Sort and remove duplicate usings
+	let fileContents: string = usings.filter((v, i, a) => a.indexOf(v) === i).sort().map(u => `using ${u};`).join('\n') + '\n\n';
 
 	// If we have a defined namespace, tab over the interface and add it
 	if(serviceNamespace){
