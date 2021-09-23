@@ -139,7 +139,7 @@ function generateBackendService(className: string, namespaceName: string): strin
 	/* TODO
 	 * 1. Fix assumptions about namespace structure (described in interface function)
 	 * 2. Find the actual DB name in the DBContext
-	 * 		a. Even if there are multiple DBContexts we should be able to used the pased in DBContext class name. 
+	 * 		a. Even if there are multiple DBContexts we should be able to use the passed in DBContext class name. 
 	 * 			Maybe instead of having a DBContext name and namespace we should have a file path to it.
 	 * 		b. Need to determine what to do if the are multiple DBSets for 1 class
 	 * 3. Determine the Primary Key from the C# model
@@ -147,12 +147,15 @@ function generateBackendService(className: string, namespaceName: string): strin
 	 * 		a. Might need to add in a configruation on if we want to include children in the Request model
 	 * 5. Add exceptions for Not Found responses
 	 * 6. Will probably need to fix the assumption that we can just use Microsoft.EntityFrameworkCore as the DB context
-	*/
-	const dbContextNamespace: string = vscode.workspace.getConfiguration().get('csharp-bootstrapper.backend.dbcontext.namespace', '');
-	
+	 * 7. Need to consider what to do if multiple classes in same file when scaffolding CRUD, currently just take the first
+	 * 8. Need to consider where AutoMapper file lives
+	 * 9. Need to consider where to add service injection
+	*/	
 	const usings: string[] = ['AutoMapper', 'Microsoft.EntityFrameworkCore', 'System', 'System.Collections.Generic', 'System.Threading.Tasks'];
 
-	if(dbContextNamespace){
+	const dbContextNamespace: string = vscode.workspace.getConfiguration().get('csharp-bootstrapper.backend.dbcontext.namespace', '');
+	
+	if (dbContextNamespace) {
 		usings.push(dbContextNamespace);
 	}
 
@@ -162,11 +165,11 @@ function generateBackendService(className: string, namespaceName: string): strin
 	const serviceInterfaceNamespace: string = vscode.workspace.getConfiguration().get('csharp-bootstrapper.backend.service.interface.namespace', '');
 
 	// Only include the class namespace if its not in the service namespace's hierarchy
-	if(!serviceNamespace.startsWith(namespaceName)){
+	if (!serviceNamespace.startsWith(namespaceName)) {
 		usings.push(namespaceName);
 	}
 
-	if(!serviceNamespace.startsWith(serviceInterfaceNamespace)){
+	if (!serviceNamespace.startsWith(serviceInterfaceNamespace)) {
 		usings.push(serviceInterfaceNamespace);
 	}
 
@@ -228,12 +231,12 @@ public class Update${className}Request {
 }`;
 
 	// If we have a defined namespace, tab over the class and add it
-	if(serviceNamespace){
+	if (serviceNamespace) {
 		serviceContents = `${serviceContents}namespace ${serviceNamespace} {
 	${classContent.replaceAll('\n','\n\t')}
 }`;
 	}
-	else{
+	else {
 		serviceContents += classContent;
 	}
 
@@ -255,12 +258,12 @@ function generateBackendServiceInterface(className: string, namespaceName: strin
 	 * Other cases may exist
 	 */
 	// Only include the class namespace if its not in the service interface namespace's hierarchy
-	if(!serviceInterfaceNamespace.startsWith(namespaceName)){
+	if (!serviceInterfaceNamespace.startsWith(namespaceName)) {
 		usings.push(namespaceName);
 	}
 
 	// Only include the service namespace if its not in the service interface namespace's hierarchy
-	if(!serviceInterfaceNamespace.startsWith(serviceNamespace)){
+	if (!serviceInterfaceNamespace.startsWith(serviceNamespace)) {
 		usings.push(serviceNamespace);
 	}
 
@@ -276,12 +279,12 @@ function generateBackendServiceInterface(className: string, namespaceName: strin
 	let fileContents: string = usings.filter((v, i, a) => a.indexOf(v) === i).sort().map(u => `using ${u};`).join('\n') + '\n\n';
 
 	// If we have a defined namespace, tab over the interface and add it
-	if(serviceNamespace){
+	if (serviceNamespace) {
 		fileContents = `${fileContents}namespace ${serviceInterfaceNamespace} {
 	${interfaceContent.replaceAll('\n','\n\t')}
 }`;
 	}
-	else{
+	else {
 		fileContents += interfaceContent;
 	}
 
