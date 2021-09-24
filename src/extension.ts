@@ -25,19 +25,19 @@ export function activate(context: vscode.ExtensionContext) {
 				// Get the document text
 				const documentText: string = fs.readFileSync(uri.fsPath).toString();
 
-				const classNames = getClassName(documentText);
-				if (!classNames.length) {
+				const parsedClasses = getClassName(documentText);
+				if (!parsedClasses.length) {
 					vscode.window.showErrorMessage('C# Bootstrapper: No class name detected.');
 					return;
 
 				}
 
-				for (let className of classNames) {
+				for (let parsedClass of parsedClasses) {
 					// Generate the file path
 					const frontendTargetDirectory: string = vscode.workspace.getConfiguration().get('csharp-bootstrapper.frontend.model.directory', '');
-					const modelPath: string = path.join(rootPath, frontendTargetDirectory, `${className}.ts`);
+					const modelPath: string = path.join(rootPath, frontendTargetDirectory, `${parsedClass}.ts`);
 
-					const fileContents: string = generateTypescriptClass(className);
+					const fileContents: string = generateTypescriptClass(parsedClass.className);
 
 					try {
 						fs.writeFileSync(modelPath, fileContents);
@@ -91,11 +91,24 @@ export class ${className} extends ${className}Dto {
 	return fileContents;
 }
 
-function getClassName(documentText: string): string[] {
-	let matches = documentText.matchAll(/public class (\w+)/g);
-	return Array.from(matches).map(matchArray => matchArray[1]).filter(match => match);
+function getClassName(documentText: string): ParsedCSharpClass[] {
+	let matches = documentText.matchAll(/public class (\w+)[^{]*{((?:[^}{]+|{(?:[^}{]+|{[^}{]*})*})*)}/g);
+	return Array.from(matches).filter(matchArray => matchArray[1]).map(matchArray => <ParsedCSharpClass>{
+		className: matchArray[1],
+		properties: [] //TODO: Write property parser
+	});
 }
 
 function getLowerCaseClassName(className: string): string {
 	return className.charAt(0).toLowerCase() + className.slice(1);
+}
+
+export class ParsedCSharpClass {
+	className!: string;
+	properties!: CSharpProperty[];
+}
+
+export class CSharpProperty {
+	name!: string;
+	type!: string; //Let's make this an enum of the basic types later
 }
