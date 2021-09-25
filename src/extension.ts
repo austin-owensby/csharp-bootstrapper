@@ -61,7 +61,7 @@ export function activate(context: vscode.ExtensionContext) {
 		try{
 			if (uri) {	
 				// Get the document text
-				const documentText: string = fs.readFileSync(uri.path).toString();
+				const documentText: string = fs.readFileSync(uri.fsPath).toString();
 
 				const className: string = getClassName(documentText);
 				const namespaceName: string = getNamespaceName(documentText);
@@ -84,7 +84,7 @@ export function activate(context: vscode.ExtensionContext) {
 
 				const serviceInterfaceFileContents= generateBackendServiceInterface(className, namespaceName);
 				const backendServiceInterfaceDirectory = vscode.workspace.getConfiguration().get('csharp-bootstrapper.backend.service.interface.directory', '');
-				const backendServiceInterfacePath = path.join(rootPath, backendServiceDirectory, `I${className}Service.cs`);
+				const backendServiceInterfacePath = path.join(rootPath, backendServiceInterfaceDirectory, `I${className}Service.cs`);
 				
 				try {
 					fs.writeFileSync(backendServiceInterfacePath, serviceInterfaceFileContents);
@@ -135,43 +135,35 @@ export class ${className} extends ${className}Dto {
 	return fileContents;
 }
 
-function generateBackendService(className: string, namespaceName: string): string {
+function generateBackendService(className: string, classNamespace: string): string {
 	/* TODO
-	 * 1. Fix assumptions about namespace structure (described in interface function)
-	 * 2. Find the actual DB name in the DBContext
+	 * 1. Find the actual DB name in the DBContext
 	 * 		a. Even if there are multiple DBContexts we should be able to use the passed in DBContext class name. 
 	 * 			Maybe instead of having a DBContext name and namespace we should have a file path to it.
 	 * 		b. Need to determine what to do if the are multiple DBSets for 1 class
-	 * 3. Determine the Primary Key from the C# model
-	 * 4. Generate Request classes based on the C# model
+	 * 2. Determine the Primary Key from the C# model
+	 * 3. Generate Request classes based on the C# model
 	 * 		a. Might need to add in a configruation on if we want to include children in the Request model
-	 * 5. Add exceptions for Not Found responses
-	 * 6. Will probably need to fix the assumption that we can just use Microsoft.EntityFrameworkCore as the DB context
-	 * 7. Need to consider what to do if multiple classes in same file when scaffolding CRUD, currently just take the first
-	 * 8. Need to consider where AutoMapper file lives
-	 * 9. Need to consider where to add service injection
-	*/	
-	const usings: string[] = ['AutoMapper', 'Microsoft.EntityFrameworkCore', 'System', 'System.Collections.Generic', 'System.Threading.Tasks'];
-
-	const dbContextNamespace: string = vscode.workspace.getConfiguration().get('csharp-bootstrapper.backend.dbcontext.namespace', '');
-	
-	if (dbContextNamespace) {
-		usings.push(dbContextNamespace);
-	}
-
+	 * 4. Add exceptions for Not Found responses
+	 * 5. Will probably need to fix the assumption that we can just use Microsoft.EntityFrameworkCore as the DB context
+	 * 6. Need to consider what to do if multiple classes in same file when scaffolding CRUD, currently just take the first
+	 * 7. Need to consider where AutoMapper file lives
+	 * 8. Need to consider where to add service injection
+	 * 9. Filename suffix schemes (Controller vs Service vs RequestHandler, etc)
+	 * 10. Logging
+	 * 11. Whether or not there are separate models for repo and db objects
+	 * 12. Binding models vs dtos
+	*/
 	const dbContext: string = vscode.workspace.getConfiguration().get('csharp-bootstrapper.backend.dbcontext.name', 'DBContext');
-
+	const dbContextNamespace: string = vscode.workspace.getConfiguration().get('csharp-bootstrapper.backend.dbcontext.namespace', '');
 	const serviceNamespace: string = vscode.workspace.getConfiguration().get('csharp-bootstrapper.backend.service.namespace', '');
 	const serviceInterfaceNamespace: string = vscode.workspace.getConfiguration().get('csharp-bootstrapper.backend.service.interface.namespace', '');
+	
+	const usings: string[] = ['AutoMapper', 'Microsoft.EntityFrameworkCore', 'System', 'System.Collections.Generic', 'System.Threading.Tasks'];
 
-	// Only include the class namespace if its not in the service namespace's hierarchy
-	if (!serviceNamespace.startsWith(namespaceName)) {
-		usings.push(namespaceName);
-	}
-
-	if (!serviceNamespace.startsWith(serviceInterfaceNamespace)) {
-		usings.push(serviceInterfaceNamespace);
-	}
+	addNamespace(usings, serviceNamespace, dbContextNamespace);
+	addNamespace(usings, serviceNamespace, classNamespace);
+	addNamespace(usings, serviceNamespace, serviceInterfaceNamespace);
 
 	// Sort and remove duplicate usings
 	let serviceContents: string = usings.filter((v, i, a) => a.indexOf(v) === i).sort().map(u => `using ${u};`).join('\n') + '\n\n';
@@ -243,29 +235,14 @@ public class Update${className}Request {
 	return serviceContents;
 }
 
-function generateBackendServiceInterface(className: string, namespaceName: string){
-	let usings: string[] = ['System.Threading.Tasks', 'System.Collections.Generic'];
-
+function generateBackendServiceInterface(className: string, classNamespace: string){
 	const serviceNamespace: string = vscode.workspace.getConfiguration().get('csharp-bootstrapper.backend.service.namespace', '');
 	const serviceInterfaceNamespace: string = vscode.workspace.getConfiguration().get('csharp-bootstrapper.backend.service.interface.namespace', '');
 	
-	/* TODO, this would fail on the example
-	 * Service Namespace: Project.Folder.Service
-	 * Interface Namespace: Project.Folder.ServiceInterface
-	 * I think I would need to check if the next character after the match:
-	 * 		1. Does not exist
-	 * 		2. Is a period
-	 * Other cases may exist
-	 */
-	// Only include the class namespace if its not in the service interface namespace's hierarchy
-	if (!serviceInterfaceNamespace.startsWith(namespaceName)) {
-		usings.push(namespaceName);
-	}
+	let usings: string[] = ['System.Threading.Tasks', 'System.Collections.Generic'];
 
-	// Only include the service namespace if its not in the service interface namespace's hierarchy
-	if (!serviceInterfaceNamespace.startsWith(serviceNamespace)) {
-		usings.push(serviceNamespace);
-	}
+	addNamespace(usings, serviceInterfaceNamespace, classNamespace);
+	addNamespace(usings, serviceInterfaceNamespace, serviceNamespace);
 
 	const interfaceContent: string = `public interface I${className}Service{
 	public Task<${className}> Get${className}(int id);
@@ -315,4 +292,24 @@ function getClassName(documentText: string): string {
 
 function getLowerCaseClassName(className: string): string {
 	return className.charAt(0).toLowerCase() + className.slice(1);
+}
+
+function addNamespace(usings: string[], fileNamespace: string, newNamespace: string): void {
+	if (newNamespace) {
+		// Add the new namespace if it doesn't start with the file's namespace
+		if (fileNamespace.startsWith(newNamespace)) {
+			if (newNamespace.length > fileNamespace.length) {
+				if (newNamespace[fileNamespace.length] !== '.') {
+					/* This logic handles cases like
+					*	File namespace: Project.File.Service
+					*	New  namespace: Project.File.ServiceInterface
+					*/
+					usings.push(newNamespace);
+				}
+			}
+		}
+		else {
+			usings.push(newNamespace);
+		}
+	}
 }
