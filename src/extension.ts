@@ -313,8 +313,9 @@ public class ${pluralize(className)}Controller: ControllerBase {
 	}
 
 	[HttpPost]
-	public async Task<${className}> Create${className}([FromBody] Create${className}Request request){
-		return Created(await ${toLowerCase(className)}Service.Create${className}(request));
+	public async Task<ActionResult<${className}>> Create${className}([FromBody] Create${className}Request request){
+		${className} ${toLowerCase(className)} = await ${toLowerCase(className)}Service.Create${className}(request);
+		return CreatedAtAction(nameof(Get${className}), new {id = ${toLowerCase(className)}.Id}, ${toLowerCase(className)});
 	}
 
 	[HttpPut("{id}")]
