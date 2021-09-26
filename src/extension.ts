@@ -3,6 +3,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import * as pluralize from 'pluralize';
 import { stringify } from 'querystring';
+import { CSharp } from './csharp';
 
 export function activate(context: vscode.ExtensionContext) {
 	let rootPath: string = '';
@@ -35,7 +36,7 @@ export function activate(context: vscode.ExtensionContext) {
 				for (let parsedClass of parsedClasses) {
 					// Generate the file path
 					const frontendTargetDirectory: string = vscode.workspace.getConfiguration().get('csharp-bootstrapper.frontend.model.directory', '');
-					const modelPath: string = path.join(rootPath, frontendTargetDirectory, `${parsedClass}.ts`);
+					const modelPath: string = path.join(rootPath, frontendTargetDirectory, `${parsedClass.className}.ts`);
 
 					const fileContents: string = generateTypescriptClass(parsedClass.className);
 

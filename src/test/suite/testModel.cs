@@ -14,4 +14,7 @@ public class ChildClass
     public Guid TestModelID { get; set; }
     public TestModel TestModel { get; set; }
     public float ChildNum { get; set; }
+    public List<bool> childFlags { get; set; }
+    public List<Dictionary<float>> currencyMap { get; set; }
+    public List<int?> nullableInts { get; set; }
 }

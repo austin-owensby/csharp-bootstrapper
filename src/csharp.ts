@@ -1,4 +1,4 @@
-namespace CSharp {
+export namespace CSharp {
 	export function parseClasses(documentText: string): ParsedClass[] {
 		let matches = documentText.matchAll(/public class (\w+)[^{]*{((?:[^}{]+|{(?:[^}{]+|{[^}{]*})*})*)}/g);
 		return Array.from(matches).filter(matchArray => matchArray[1]).map(matchArray => <ParsedClass>{
@@ -8,17 +8,27 @@ namespace CSharp {
 	}
 
 	function parseProperties(classContents: string): Property[] {
-		let matches = classContents.matchAll(/public (\w+)(\??) (\w+)\s?{\s?get;\s?set;\s?}/g);
+		// TODO: This doesn't catch lists of nullable types
+		// TODO: Doesn't handle multiple parameters in generic, like Dictionary
+		let matches = classContents.matchAll(/public ([\w<>]+)(\??) (\w+)\s?{\s?get;\s?set;\s?}/g);
 		return Array.from(matches).filter(matchArray => matchArray[1] && matchArray[3]).map(matchArray => <Property>{
-			name: matchArray[1],
+			type: parseType(matchArray[1]),
 			nullable: matchArray[2] === "?",
-			type: parseType(matchArray[3])
+			name: matchArray[3]
 		});
 	}
 
 	function parseType(unparsedType: string): Type {
-		//TODO
-		return BasicType.bool;
+		let collectionMatch = unparsedType.match(`(?:${Object.keys(CollectionType).filter(k => isNaN(<any>k)).join('|')})<(.*)>$`);
+		if (collectionMatch?.[0]) {
+			return <Collection>{
+				innerType: parseType(collectionMatch[1]),
+				collectionType: CollectionType[collectionMatch[0] as keyof typeof CollectionType]
+			};
+		}
+		return BasicType[unparsedType as keyof typeof BasicType] ?? <UserDefinedType>{
+			name: unparsedType
+		};
 	}
 
 	export class ParsedClass {
@@ -65,13 +75,15 @@ namespace CSharp {
 	}
 
 	enum CollectionType {
-		dictionary,
-		list,
-		queue,
-		sortedList,
-		stack,
-		arrayList,
-		hashtable
+		/* eslint-disable @typescript-eslint/naming-convention */
+		Dictionary,
+		List,
+		Queue,
+		SortedList,
+		Stack,
+		ArrayList,
+		Hashtable
+		/* eslint-disable @typescript-eslint/naming-convention */
 	}
 
 	type Type = BasicType | UserDefinedType | Collection;
