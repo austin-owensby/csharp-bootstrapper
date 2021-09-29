@@ -29,7 +29,6 @@ export function activate(context: vscode.ExtensionContext) {
 				if (!parsedClasses.length) {
 					vscode.window.showErrorMessage('C# Bootstrapper: No class name detected.');
 					return;
-
 				}
 
 				for (let parsedClass of parsedClasses) {
@@ -66,34 +65,35 @@ export function activate(context: vscode.ExtensionContext) {
 				// Get the document text
 				const documentText: string = fs.readFileSync(uri.fsPath).toString();
 
-				const className: string = getClassName(documentText);
 				const namespaceName: string = getNamespaceName(documentText);
-
-				if(!className){
+				const parsedClasses = CSharp.parseClasses(documentText);
+				if (!parsedClasses.length) {
 					vscode.window.showErrorMessage('C# Bootstrapper: No class name detected.');
 					return;
 				}
 
-				const serviceFileContents = generateBackendService(className, namespaceName);
-				const backendServiceDirectory = vscode.workspace.getConfiguration().get('csharp-bootstrapper.backend.service.directory', '');
-				const backendServicePath = path.join(rootPath, backendServiceDirectory, `${className}Service.cs`);
+				for (let parsedClass of parsedClasses) {
+					const serviceFileContents = generateBackendService(parsedClass.className, namespaceName);
+					const backendServiceDirectory = vscode.workspace.getConfiguration().get('csharp-bootstrapper.backend.service.directory', '');
+					const backendServicePath = path.join(rootPath, backendServiceDirectory, `${parsedClass.className}Service.cs`);
 
-				try {
-					fs.writeFileSync(backendServicePath, serviceFileContents);
-				} catch (e) {
-					vscode.window.showErrorMessage('C# Bootstrapper: Error creating backend service.');
-					console.error(e);
-				}
+					try {
+						fs.writeFileSync(backendServicePath, serviceFileContents);
+					} catch (e) {
+						vscode.window.showErrorMessage('C# Bootstrapper: Error creating backend service.');
+						console.error(e);
+					}
 
-				const serviceInterfaceFileContents= generateBackendServiceInterface(className, namespaceName);
-				const backendServiceInterfaceDirectory = vscode.workspace.getConfiguration().get('csharp-bootstrapper.backend.service.interface.directory', '');
-				const backendServiceInterfacePath = path.join(rootPath, backendServiceInterfaceDirectory, `I${className}Service.cs`);
-				
-				try {
-					fs.writeFileSync(backendServiceInterfacePath, serviceInterfaceFileContents);
-				} catch (e) {
-					vscode.window.showErrorMessage('C# Bootstrapper: Error creating backend service interface.');
-					console.error(e);
+					const serviceInterfaceFileContents= generateBackendServiceInterface(parsedClass.className, namespaceName);
+					const backendServiceInterfaceDirectory = vscode.workspace.getConfiguration().get('csharp-bootstrapper.backend.service.interface.directory', '');
+					const backendServiceInterfacePath = path.join(rootPath, backendServiceInterfaceDirectory, `I${parsedClass.className}Service.cs`);
+					
+					try {
+						fs.writeFileSync(backendServiceInterfacePath, serviceInterfaceFileContents);
+					} catch (e) {
+						vscode.window.showErrorMessage('C# Bootstrapper: Error creating backend service interface.');
+						console.error(e);
+					}
 				}
 			}
 			else{
@@ -272,25 +272,11 @@ function generateBackendServiceInterface(className: string, classNamespace: stri
 }
 
 function getNamespaceName(documentText: string): string{
-	const documentTextArray: string[] = documentText.split('namespace');
-	if (documentTextArray.length <= 1) {
-		return '';
+	const match = documentText.match(/namespace\s+(\w+)/);
+	if(match){
+		return match[1];
 	}
-
-	return documentTextArray[1].trim().split(/\s+/)[0].trim();
-}
-
-function getClassName(documentText: string): string {
-	// TODO: Replace with regex that covers all the cases
-	const documentTextArray: string[] = documentText.split('class ');
-	if (documentTextArray.length <= 1) {
-		vscode.window.showErrorMessage('No class name detected.');
-		return '';
-	}
-
-	const textAfterClass: string = documentTextArray[1];
-	// TODO: Replace with regex that covers all the cases
-	return textAfterClass.trim().split(/\s+/)[0].split(':')[0].trim();
+	return '';
 }
 
 function getLowerCaseClassName(className: string): string {
