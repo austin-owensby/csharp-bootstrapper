@@ -16,7 +16,9 @@ In addition it will have configurations allowing the API generation to be flexib
 
 * `csharp-bootstrapper.convert-model`: Converts the C# model to a typescript model at the configured folder.
 
-* `csharp-bootstrapper.settings`: Navigates to the extension settings.
+* `csharp-boostrapper.boostrap-crud` Generates a CRUD workflow based on the configurations.
+
+* `csharp-bootstrapper.settings` Navigates to the extension settings.
 
 ### Environment Setup
 
@@ -40,6 +42,22 @@ This extension contributes the following settings:
 #### Model
 
 * `csharp-bootstrapper.frontend.model.directory`: The directory that frontend typescript Model should be added.
+
+### Backend
+
+#### Service
+
+* `csharp-bootstrapper.backend.service.directory` The directory that backend C# Service should be added.
+* `csharp-bootstrapper.backend.service.namespace` The namespace of the backend C# Service.
+
+##### Interface
+* `csharp-bootstrapper.backend.service.interface.directory` The directory that backend C# Service Interface should be added.
+* `csharp-bootstrapper.backend.service.interface.namespace` The namespace of the backend C# Service Interface.
+
+#### DB Context
+
+* `csharp-bootstrapper.backend.dbcontext.name` The name of the Database Context class.
+* `csharp-bootstrapper.backend.dbcontext.namespace` The namespace of the Database Context class.
 
 ## Known Issues
 
