@@ -2,7 +2,6 @@ import * as vscode from 'vscode';
 import * as fs from 'fs';
 import * as path from 'path';
 import * as pluralize from 'pluralize';
-import { stringify } from 'querystring';
 import { CSharp } from './csharp';
 
 export function activate(context: vscode.ExtensionContext) {

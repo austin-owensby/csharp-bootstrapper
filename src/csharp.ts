@@ -60,7 +60,31 @@ export namespace CSharp {
 		ushort,
 		object,
 		string,
-		dynamic
+		dynamic,
+		/* eslint-disable @typescript-eslint/naming-convention */
+		Boolean,
+		Byte,
+		SByte,
+		Char,
+		Decimal,
+		Double,
+		Single,
+		Int32,
+		UInt32,
+		IntPtr,
+		UIntPtr,
+		Int64,
+		UInt64,
+		Int16,
+		UInt16,
+		Object,
+		String,
+		Guid,
+		DateTime,
+		DateTimeOffset,
+		TimeSpan,
+		Half,
+		/* eslint-disable @typescript-eslint/naming-convention */
 	}
 
 	export class UserDefinedType {
@@ -78,11 +102,16 @@ export namespace CSharp {
 		/* eslint-disable @typescript-eslint/naming-convention */
 		Dictionary,
 		List,
+		IList,
+		ICollection,
+		Collection,
+		IEnumerable,
+		Enumerable,
 		Queue,
 		SortedList,
 		Stack,
 		ArrayList,
-		Hashtable
+		Hashtable,
 		/* eslint-disable @typescript-eslint/naming-convention */
 	}
 
