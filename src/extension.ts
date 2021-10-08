@@ -77,6 +77,8 @@ export function activate(context: vscode.ExtensionContext) {
 
 				try {
 					fs.writeFileSync(backendServicePath, serviceFileContents);
+					// file written successfully, open it
+					vscode.window.showTextDocument(vscode.Uri.file(backendServicePath), { preserveFocus: true, preview: false });
 				} catch (e) {
 					vscode.window.showErrorMessage('C# Bootstrapper: Error creating backend service.');
 					console.error(e);
@@ -88,6 +90,8 @@ export function activate(context: vscode.ExtensionContext) {
 				
 				try {
 					fs.writeFileSync(backendServiceInterfacePath, serviceInterfaceFileContents);
+					// file written successfully, open it
+					vscode.window.showTextDocument(vscode.Uri.file(backendServiceInterfacePath), { preserveFocus: true, preview: false });
 				} catch (e) {
 					vscode.window.showErrorMessage('C# Bootstrapper: Error creating backend service interface.');
 					console.error(e);
@@ -232,7 +236,7 @@ public class Create${className}Request {
 }
 
 public class Update${className}Request {
-
+	public int Id {get; set;}
 }`;
 
 	// If we have a defined namespace, tab over the class and add it
@@ -258,11 +262,11 @@ function generateBackendServiceInterface(className: string, classNamespace: stri
 	addNamespace(usings, serviceInterfaceNamespace, serviceNamespace);
 
 	const interfaceContent: string = `public interface I${className}Service{
-	public Task<${className}> Get${className}(int id);
-	public Task<List<${className}>> Get${pluralize(className)}();
-	public Task<${className}> Create${className}(Create${className}Request request);
-	public Task<${className}> Update${className}(Update${className}Request request);
-	public Task Delete${className}(int id);
+	Task<${className}> Get${className}(int id);
+	Task<List<${className}>> Get${pluralize(className)}();
+	Task<${className}> Create${className}(Create${className}Request request);
+	Task<${className}> Update${className}(Update${className}Request request);
+	Task Delete${className}(int id);
 }`;
 
 	// Sort and remove duplicate usings
