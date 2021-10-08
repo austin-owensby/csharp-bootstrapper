@@ -286,6 +286,12 @@ function generateBackendServiceInterface(className: string, classNamespace: stri
 }
 
 function generateController(className: string, classNamespace: string): string {
+	/*
+		TODO
+		1. Add option for ProducesResponseType attributes
+		2. Sync vs. Async option, will affect service too
+		3. More options about response types (CreatedAtAction vs. Created vs. a normal 200 respones)
+	*/
 	const controllerNamespace: string = vscode.workspace.getConfiguration().get('csharp-bootstrapper.backend.controller.namespace', '');
 	const serviceNamespace: string = vscode.workspace.getConfiguration().get('csharp-bootstrapper.backend.service.namespace', '');
 	const serviceInterfaceNamespace: string = vscode.workspace.getConfiguration().get('csharp-bootstrapper.backend.service.interface.namespace', '');
