@@ -20,6 +20,8 @@ In addition it will have configurations allowing the API generation to be flexib
 
 * `csharp-bootstrapper.settings` Navigates to the extension settings.
 
+* `csharp-bootstrapper.settings-gui` Displays a WebView GUI with the extension settings.
+
 ### Environment Setup
 
 How do we set up the environement?

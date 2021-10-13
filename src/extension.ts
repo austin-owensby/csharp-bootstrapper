@@ -3,6 +3,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import * as pluralize from 'pluralize';
 import { CSharp } from './csharp';
+import { SettingsPanel } from './panels/SettingsPanel';
 
 export function activate(context: vscode.ExtensionContext) {
 	let rootPath: string = '';
@@ -104,6 +105,11 @@ export function activate(context: vscode.ExtensionContext) {
 			vscode.window.showErrorMessage('C# Bootstrapper: An unknown error occured.');
 			console.error(e);
 		}
+	}));
+
+	// Display a WebView to edit settings through a more focused GUI
+	context.subscriptions.push(vscode.commands.registerCommand('csharp-bootstrapper.settings-gui', () => {
+		SettingsPanel.render(context.extensionUri);
 	}));
 }
 
