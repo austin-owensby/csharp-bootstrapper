@@ -4,20 +4,22 @@ import { getUri } from '../utilities/getUri';
 export class SettingsPanel {
   public static currentPanel: SettingsPanel | undefined;
   private readonly panel: vscode.WebviewPanel;
+  private readonly extensionUri: vscode.Uri;
   private disposables: vscode.Disposable[] = [];
 
   private constructor(panel: vscode.WebviewPanel, extensionUri: vscode.Uri) {
     this.panel = panel;
+    this.extensionUri = extensionUri;
     this.panel.onDidDispose(this.dispose, null, this.disposables);
-    this.panel.webview.html = this.getWebviewContent(this.panel.webview, extensionUri);
-    this.setWebviewMessageListener(this.panel.webview);  
+    this.panel.webview.html = this.getWebviewContent(this.panel.webview, this.extensionUri);
+    this.setWebviewMessageListener(this.panel.webview);
   }
 
   public static render(extensionUri: vscode.Uri) {
     if (SettingsPanel.currentPanel) {
       SettingsPanel.currentPanel.panel.reveal(vscode.ViewColumn.One);
     } else {
-      const panel = vscode.window.createWebviewPanel("settings", "Settings", vscode.ViewColumn.One, {
+      const panel = vscode.window.createWebviewPanel("settings", "C# Bootstrapper Extension Settings", vscode.ViewColumn.One, {
         enableScripts: true,
       });
 
@@ -47,9 +49,13 @@ export class SettingsPanel {
         "toolkit.js",
       ]);
     
-    const mainUri = getUri(webview, extensionUri, ["media","main.js"]);
+    const mainUri = getUri(webview, extensionUri, ["src", "media","settingsGui.js"]);
     
-    // Tip: Install the es6-string-html VS Code extension to enable code highlighting below
+    // Each input should have the class "config"
+    // Also an id formatted similiar to the config section
+    // Ex. config section = csharp-bootstrapper.backend.service.directory
+    // <vscode-text-field id="backend-service-directory" class="config" value="${vscode.workspace.getConfiguration().get("csharp-bootstrapper.backend.service-directory")}">Service Directory</vscode-text-field>
+
     return /*html*/ `
       <!DOCTYPE html>
       <html lang="en">
@@ -58,27 +64,59 @@ export class SettingsPanel {
           <meta name="viewport" content="width=device-width,initial-scale=1.0">
           <script type="module" src="${toolkitUri}"></script>
           <script type="module" src="${mainUri}"></script>
-          <title>Hello World!</title>
+          <title>C# Bootstrapper Extension Settings</title>
         </head>
         <body>
-          <h1>Hello World!</h1>
-          <vscode-button id="howdy">Howdy!</vscode-button>
+          <vscode-panels>
+            <vscode-panel-tab id="general">General</vscode-panel-tab>
+            <vscode-panel-tab id="service">Service</vscode-panel-tab>
+            <vscode-panel-tab id="controller">Controller</vscode-panel-tab>
+            <vscode-panel-tab id="frontend-service">Frontend Service</vscode-panel-tab>
+            <vscode-panel-tab id="frontend-model">Frontend Model</vscode-panel-tab>
+            <vscode-panel-view id="view-general"> 
+              <section style="display: flex; flex-direction: column; width: 100%;">
+                <h1 style="margin-top: 0;">General Settings</h1>
+                <h2>DB Context</h2>
+                <vscode-text-field id="backend-dbcontext-name" class="config" value="${vscode.workspace.getConfiguration().get("csharp-bootstrapper.backend.dbcontext.name")}">DBContext Name</vscode-text-field>
+                <vscode-text-field id="backend-dbcontext-namespace" class="config" value="${vscode.workspace.getConfiguration().get("csharp-bootstrapper.backend.dbcontext.namespace")}">DBContext Namespace</vscode-text-field>
+              </section>
+            </vscode-panel-view>
+            <vscode-panel-view id="view-service">
+              <section style="display: flex; flex-direction: column; width: 100%;">
+                <h1 style="margin-top: 0;">C# Service Settings</h1>
+              </section>
+            </vscode-panel-view>
+            <vscode-panel-view id="view-controller">        
+              <section style="display: flex; flex-direction: column; width: 100%;">
+                <h1 style="margin-top: 0;">C# Controller Settings</h1>
+              </section>
+            </vscode-panel-view>
+            <vscode-panel-view id="view-frontend-service">
+              <section style="display: flex; flex-direction: column; width: 100%;">
+                <h1 style="margin-top: 0;">Typescript Frontend Service Settings</h1>
+              </section>
+            </vscode-panel-view>
+            <vscode-panel-view id="view-frontend-model">
+              <section style="display: flex; flex-direction: column; width: 100%;">
+                <h1 style="margin-top: 0;">Typescript Frontend Model Settings</h1>
+              </section>
+            </vscode-panel-view>
+          </vscode-panels>
         </body>
-      </html>
-    `;
+      </html>`;
   }
 
   private setWebviewMessageListener(webview: vscode.Webview) {
     webview.onDidReceiveMessage(
-      (message: any) => {
-        const command = message.command;
-        const text = message.text;
+      async (message: any) => {
+        const config = message.config;
+        const value = message.value;
 
-        switch (command) {
-          case "hello":
-            vscode.window.showInformationMessage(text);
-            return;
-        }
+        // Update the configuration value
+        await vscode.workspace.getConfiguration('csharp-bootstrapper').update(config, value);
+        
+        // Update html with the new values (That way you can navigate away from the WebView and come back and see the correct values)
+        webview.html = this.getWebviewContent(webview, this.extensionUri);
       },
       undefined,
       this.disposables
