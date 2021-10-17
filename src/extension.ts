@@ -4,7 +4,7 @@ import * as path from 'path';
 import { SettingsPanel } from './panels/settingsPanel';
 import { CSharp } from './utilities/csharp';
 import { getNamespaceName } from './utilities/helpers';
-import { generateTypescriptClass, generateBackendService, generateBackendServiceInterface } from './utilities/generateFiles';
+import { generateTypescriptClass, generateController , generateBackendService, generateBackendServiceInterface } from './utilities/generateFiles';
 
 export function activate(context: vscode.ExtensionContext) {
 	let rootPath: string = '';
@@ -74,26 +74,47 @@ export function activate(context: vscode.ExtensionContext) {
 					return;
 				}
 
+				// For each class, generate a controller, service, and service interface
 				for (let parsedClass of parsedClasses) {
+					// Backend service
 					const serviceFileContents = generateBackendService(parsedClass.className, namespaceName);
 					const backendServiceDirectory = vscode.workspace.getConfiguration().get('csharp-bootstrapper.backend.service.directory', '');
 					const backendServicePath = path.join(rootPath, backendServiceDirectory, `${parsedClass.className}Service.cs`);
 
 					try {
 						fs.writeFileSync(backendServicePath, serviceFileContents);
+						// file written successfully, open it
+						vscode.window.showTextDocument(vscode.Uri.file(backendServicePath), { preview: false, preserveFocus: true });
 					} catch (e) {
 						vscode.window.showErrorMessage('C# Bootstrapper: Error creating backend service.');
 						console.error(e);
 					}
 
+					// Backend service interface
 					const serviceInterfaceFileContents= generateBackendServiceInterface(parsedClass.className, namespaceName);
 					const backendServiceInterfaceDirectory = vscode.workspace.getConfiguration().get('csharp-bootstrapper.backend.service.interface.directory', '');
 					const backendServiceInterfacePath = path.join(rootPath, backendServiceInterfaceDirectory, `I${parsedClass.className}Service.cs`);
 					
 					try {
 						fs.writeFileSync(backendServiceInterfacePath, serviceInterfaceFileContents);
+						// file written successfully, open it
+						vscode.window.showTextDocument(vscode.Uri.file(backendServiceInterfacePath), { preview: false, preserveFocus: true });
 					} catch (e) {
 						vscode.window.showErrorMessage('C# Bootstrapper: Error creating backend service interface.');
+						console.error(e);
+					}				
+					
+					// Controller
+					const controllerFileContents= generateController(parsedClass.className, namespaceName);
+					const backendControllerDirectory = vscode.workspace.getConfiguration().get('csharp-bootstrapper.backend.controller.directory', '');
+					const backendControllerPath = path.join(rootPath, backendControllerDirectory, `${parsedClass.className}Controller.cs`);
+					
+					try {
+						fs.writeFileSync(backendControllerPath, controllerFileContents);
+						// file written successfully, navigate to it
+						vscode.window.showTextDocument(vscode.Uri.file(backendControllerPath), { preview: false });
+					} catch (e) {
+						vscode.window.showErrorMessage('C# Bootstrapper: Error creating backend controller.');
 						console.error(e);
 					}
 				}
@@ -113,5 +134,5 @@ export function activate(context: vscode.ExtensionContext) {
 		SettingsPanel.render(context.extensionUri);
 	}));
 }
-
+ 
 export function deactivate() { }

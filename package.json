@@ -64,6 +64,16 @@
 						"default": "",
 						"description": "The directory that frontend typescript models should be added."
 					},
+					"csharp-bootstrapper.backend.controller.directory": {
+						"type": "string",
+						"default": "",
+						"description": "The directory that backend C# Controller should be added."
+					},
+					"csharp-bootstrapper.backend.controller.namespace": {
+						"type": "string",
+						"default": "",
+						"description": "The namespace of the backend C# Controller."
+					},
 					"csharp-bootstrapper.backend.service.directory": {
 						"type": "string",
 						"default": "",

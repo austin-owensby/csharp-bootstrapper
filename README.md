@@ -47,6 +47,11 @@ This extension contributes the following settings:
 
 ### Backend
 
+#### Controller
+
+* `csharp-bootstrapper.backend.controller.directory` The directory that backend C# Controller should be added.
+* `csharp-bootstrapper.backend.controller.namespace` The namespace of the backend C# Controller.
+
 #### Service
 
 * `csharp-bootstrapper.backend.service.directory` The directory that backend C# Service should be added.
