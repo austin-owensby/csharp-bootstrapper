@@ -84,11 +84,19 @@ export class SettingsPanel {
             <vscode-panel-view id="view-service">
               <section style="display: flex; flex-direction: column; width: 100%;">
                 <h1 style="margin-top: 0;">C# Service Settings</h1>
+                <h2>Service</h2>
+                <vscode-text-field id="backend-service-directory" class="config" value="${vscode.workspace.getConfiguration().get("csharp-bootstrapper.backend.service.directory")}">Directory</vscode-text-field>
+                <vscode-text-field id="backend-service-namespace" class="config" value="${vscode.workspace.getConfiguration().get("csharp-bootstrapper.backend.service.namespace")}">Namespace</vscode-text-field>
+                <h2>Service Interface</h2>
+                <vscode-text-field id="backend-service-interface-directory" class="config" value="${vscode.workspace.getConfiguration().get("csharp-bootstrapper.backend.service.interface.directory")}">Directory</vscode-text-field>
+                <vscode-text-field id="backend-service-interface-namespace" class="config" value="${vscode.workspace.getConfiguration().get("csharp-bootstrapper.backend.service.interface.namespace")}">Namespace</vscode-text-field>
               </section>
             </vscode-panel-view>
             <vscode-panel-view id="view-controller">        
               <section style="display: flex; flex-direction: column; width: 100%;">
                 <h1 style="margin-top: 0;">C# Controller Settings</h1>
+                <vscode-text-field id="backend-controller-directory" class="config" value="${vscode.workspace.getConfiguration().get("csharp-bootstrapper.backend.controller.directory")}">Directory</vscode-text-field>
+                <vscode-text-field id="backend-controller-namespace" class="config" value="${vscode.workspace.getConfiguration().get("csharp-bootstrapper.backend.controller.namespace")}">Namespace</vscode-text-field>
               </section>
             </vscode-panel-view>
             <vscode-panel-view id="view-frontend-service">
@@ -99,6 +107,7 @@ export class SettingsPanel {
             <vscode-panel-view id="view-frontend-model">
               <section style="display: flex; flex-direction: column; width: 100%;">
                 <h1 style="margin-top: 0;">Typescript Frontend Model Settings</h1>
+                <vscode-text-field id="frontend-model-directory" class="config" value="${vscode.workspace.getConfiguration().get("csharp-bootstrapper.frontend.model.directory")}">Directory</vscode-text-field>
               </section>
             </vscode-panel-view>
           </vscode-panels>

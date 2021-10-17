@@ -6,8 +6,8 @@ export function getNamespaceName(documentText: string): string{
 	return '';
 }
 
-export function getLowerCaseClassName(className: string): string {
-	return className.charAt(0).toLowerCase() + className.slice(1);
+export function toLowerCase(data: string): string {
+	return data.charAt(0).toLowerCase() + data.slice(1);
 }
 
 export function addNamespace(usings: string[], fileNamespace: string, newNamespace: string): void {

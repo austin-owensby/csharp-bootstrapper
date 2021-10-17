@@ -1,6 +1,6 @@
 import * as pluralize from 'pluralize';
 import * as vscode from 'vscode';
-import { getLowerCaseClassName, addNamespace } from './helpers';
+import { toLowerCase, addNamespace } from './helpers';
 
 export function generateTypescriptClass(className: string): string {
 	let fileContents: string = `export interface I${className} {\n`;
@@ -156,29 +156,29 @@ export function generateBackendService(className: string, classNamespace: string
 	}
 
 	public async Task<${className}> Create${className}(Create${className}Request request){
-		${className} ${getLowerCaseClassName(className)} = mapper.Map<${className}>(request);
+		${className} ${toLowerCase(className)} = mapper.Map<${className}>(request);
 
-		context.${pluralize(className)}.Add(${getLowerCaseClassName(className)});
+		context.${pluralize(className)}.Add(${toLowerCase(className)});
 
 		await context.SaveChangesAsync();
 
-		return ${getLowerCaseClassName(className)};
+		return ${toLowerCase(className)};
 	}
 
 	public async Task<${className}> Update${className}(Update${className}Request request){
-		${className} ${getLowerCaseClassName(className)} = await context.${pluralize(className)}.FindAsync(request.Id);
+		${className} ${toLowerCase(className)} = await context.${pluralize(className)}.FindAsync(request.Id);
 
-		${getLowerCaseClassName(className)} = mapper.Map<${className}>(request);
+		${toLowerCase(className)} = mapper.Map<${className}>(request);
 
 		await context.SaveChangesAsync();
 
-		return ${getLowerCaseClassName(className)};
+		return ${toLowerCase(className)};
 	}
 
 	public async Task Delete${className}(int id){
-		${className} ${getLowerCaseClassName(className)} = await context.${pluralize(className)}.FindAsync(id);
+		${className} ${toLowerCase(className)} = await context.${pluralize(className)}.FindAsync(id);
 
-		context.${pluralize(className)}.Remove(${getLowerCaseClassName(className)});
+		context.${pluralize(className)}.Remove(${toLowerCase(className)});
 
 		await context.SaveChangesAsync();
 	}
@@ -205,7 +205,7 @@ public class Update${className}Request {
 	return serviceContents;
 }
 
-export function generateBackendServiceInterface(className: string, classNamespace: string){
+export function generateBackendServiceInterface(className: string, classNamespace: string): string {
 	const serviceNamespace: string = vscode.workspace.getConfiguration().get('csharp-bootstrapper.backend.service.namespace', '');
 	const serviceInterfaceNamespace: string = vscode.workspace.getConfiguration().get('csharp-bootstrapper.backend.service.interface.namespace', '');
 	
