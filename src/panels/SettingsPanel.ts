@@ -65,6 +65,25 @@ export class SettingsPanel {
           <script type="module" src="${toolkitUri}"></script>
           <script type="module" src="${mainUri}"></script>
           <title>C# Bootstrapper Extension Settings</title>
+          <style>
+            .code-block{
+              background-color: #3c3c3c;
+              font-family: Consolas,"Courier New",Courier,Monospace;
+              color: #499cd5;
+            }
+
+            .code-block .object{
+              color: #39c8b0;
+            }
+
+            .code-block .field{
+              color: #9cdcfe;
+            }
+
+            .code-block .symbol{
+              color: white;
+            }
+          </style>
         </head>
         <body>
           <vscode-panels>
@@ -79,6 +98,22 @@ export class SettingsPanel {
                 <h2>DB Context</h2>
                 <vscode-text-field id="backend-dbcontext-name" class="config" value="${vscode.workspace.getConfiguration().get("csharp-bootstrapper.backend.dbcontext.name")}">DBContext Name</vscode-text-field>
                 <vscode-text-field id="backend-dbcontext-namespace" class="config" value="${vscode.workspace.getConfiguration().get("csharp-bootstrapper.backend.dbcontext.namespace")}">DBContext Namespace</vscode-text-field>
+                <h2>Model Example</h2>
+                <pre class="code-block">
+  namespace Project.Models
+  <span class="symbol">{</span>
+      public class <span class="object">Student</span>
+      <span class="symbol">{</span>
+          public int <span class="field">StudentID</span> <span class="symbol">{</span> get<span class="symbol">;</span> set<span class="symbol">;</span> <span class="symbol">}</span>
+          public string <span class="field">StudentName</span> <span class="symbol">{</span> get<span class="symbol">;</span> set<span class="symbol">;</span> <span class="symbol">}</span>
+          public <span class="object">DateTime</span><span class="symbol">?</span> <span class="field">DateOfBirth</span> <span class="symbol">{</span> get<span class="symbol">;</span> set<span class="symbol">;</span> <span class="symbol">}</span>
+          public byte<span class="symbol">[]</span>  <span class="field">Photo</span> <span class="symbol">{</span> get<span class="symbol">;</span> set<span class="symbol">;</span> <span class="symbol">}</span>
+          public decimal <span class="field">Height</span> <span class="symbol">{</span> get<span class="symbol">;</span> set<span class="symbol">;</span> <span class="symbol">}</span>
+          public float <span class="field">Weight</span> <span class="symbol">{</span> get<span class="symbol">;</span> set<span class="symbol">;</span> <span class="symbol">}</span>
+          public <span class="object">Grade</span>  <span class="field">Grade</span> <span class="symbol">{</span> get<span class="symbol">;</span> set<span class="symbol">;</span> <span class="symbol">}</span>
+      <span class="symbol">}</span>
+  <span class="symbol">}</span>
+                </pre>
               </section>
             </vscode-panel-view>
             <vscode-panel-view id="view-service">
@@ -86,7 +121,7 @@ export class SettingsPanel {
                 <h1 style="margin-top: 0;">C# Service Settings</h1>
                 <h2>Service</h2>
                 <vscode-text-field id="backend-service-directory" class="config" value="${vscode.workspace.getConfiguration().get("csharp-bootstrapper.backend.service.directory")}">Directory</vscode-text-field>
-                <vscode-text-field id="backend-service-namespace" class="config" value="${vscode.workspace.getConfiguration().get("csharp-bootstrapper.backend.service.namespace")}">Namespace</vscode-text-field>
+                <vscode-text-field id="backend-service-namespace" class="config" value="${vscode.workspace.getConfiguration().get("csharp-bootstrapper.backend.service.namespace")}">Namespace</vscode-text-field> 
                 <h2>Service Interface</h2>
                 <vscode-text-field id="backend-service-interface-directory" class="config" value="${vscode.workspace.getConfiguration().get("csharp-bootstrapper.backend.service.interface.directory")}">Directory</vscode-text-field>
                 <vscode-text-field id="backend-service-interface-namespace" class="config" value="${vscode.workspace.getConfiguration().get("csharp-bootstrapper.backend.service.interface.namespace")}">Namespace</vscode-text-field>
