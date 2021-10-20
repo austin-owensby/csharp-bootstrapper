@@ -72,26 +72,47 @@ export function activate(context: vscode.ExtensionContext) {
 					return;
 				}
 
+				// For each class, generate a controller, service, and service interface
 				for (let parsedClass of parsedClasses) {
+					// Backend service
 					const serviceFileContents = generateBackendService(parsedClass, namespaceName);
 					const backendServiceDirectory = vscode.workspace.getConfiguration().get('csharp-bootstrapper.backend.service.directory', '');
 					const backendServicePath = path.join(rootPath, backendServiceDirectory, `${parsedClass.className}Service.cs`);
 
 					try {
 						fs.writeFileSync(backendServicePath, serviceFileContents);
+						// file written successfully, open it
+						vscode.window.showTextDocument(vscode.Uri.file(backendServicePath), { preview: false, preserveFocus: true });
 					} catch (e) {
 						vscode.window.showErrorMessage('C# Bootstrapper: Error creating backend service.');
 						console.error(e);
 					}
 
-					const serviceInterfaceFileContents= generateBackendServiceInterface(parsedClass, namespaceName);
+					// Backend service interface
+					const serviceInterfaceFileContents = generateBackendServiceInterface(parsedClass, namespaceName);
 					const backendServiceInterfaceDirectory = vscode.workspace.getConfiguration().get('csharp-bootstrapper.backend.service.interface.directory', '');
 					const backendServiceInterfacePath = path.join(rootPath, backendServiceInterfaceDirectory, `I${parsedClass.className}Service.cs`);
 					
 					try {
 						fs.writeFileSync(backendServiceInterfacePath, serviceInterfaceFileContents);
+						// file written successfully, open it
+						vscode.window.showTextDocument(vscode.Uri.file(backendServiceInterfacePath), { preview: false, preserveFocus: true });
 					} catch (e) {
 						vscode.window.showErrorMessage('C# Bootstrapper: Error creating backend service interface.');
+						console.error(e);
+					}				
+					
+					// Controller
+					const controllerFileContents= generateController(parsedClass.className, namespaceName);
+					const backendControllerDirectory = vscode.workspace.getConfiguration().get('csharp-bootstrapper.backend.controller.directory', '');
+					const backendControllerPath = path.join(rootPath, backendControllerDirectory, `${parsedClass.className}Controller.cs`);
+					
+					try {
+						fs.writeFileSync(backendControllerPath, controllerFileContents);
+						// file written successfully, navigate to it
+						vscode.window.showTextDocument(vscode.Uri.file(backendControllerPath), { preview: false });
+					} catch (e) {
+						vscode.window.showErrorMessage('C# Bootstrapper: Error creating backend controller.');
 						console.error(e);
 					}
 				}
@@ -184,8 +205,8 @@ function generateBackendService(parsedClass: CSharp.ParsedClass, classNamespace:
 		this.context = context ?? throw new ArgumentNullException(nameof(context));
 	}
 
-	public async Task<${className}> Get${className}(${CSharp.BasicType[primaryKey.type as CSharp.BasicType]} ${getLowerCaseClassName(primaryKey.name)}){
-		return await context.${pluralize(className)}.FindAsync(${getLowerCaseClassName(primaryKey.name)});
+	public async Task<${className}> Get${className}(${CSharp.BasicType[primaryKey.type as CSharp.BasicType]} ${toLowerCase(primaryKey.name)}){
+		return await context.${pluralize(className)}.FindAsync(${toLowerCase(primaryKey.name)});
 	}
 
 	public async Task<List<${className}>> Get${pluralize(className)}(){
@@ -193,29 +214,29 @@ function generateBackendService(parsedClass: CSharp.ParsedClass, classNamespace:
 	}
 
 	public async Task<${className}> Create${className}(Create${className}Request request){
-		${className} ${getLowerCaseClassName(className)} = mapper.Map<${className}>(request);
+		${className} ${toLowerCase(className)} = mapper.Map<${className}>(request);
 
-		context.${pluralize(className)}.Add(${getLowerCaseClassName(className)});
+		context.${pluralize(className)}.Add(${toLowerCase(className)});
 
 		await context.SaveChangesAsync();
 
-		return ${getLowerCaseClassName(className)};
+		return ${toLowerCase(className)};
 	}
 
 	public async Task<${className}> Update${className}(Update${className}Request request){
-		${className} ${getLowerCaseClassName(className)} = await context.${pluralize(className)}.FindAsync(request.${primaryKey.name});
+		${className} ${toLowerCase(className)} = await context.${pluralize(className)}.FindAsync(request.${primaryKey.name});
 
-		${getLowerCaseClassName(className)} = mapper.Map<${className}>(request);
+		${toLowerCase(className)} = mapper.Map<${className}>(request);
 
 		await context.SaveChangesAsync();
 
-		return ${getLowerCaseClassName(className)};
+		return ${toLowerCase(className)};
 	}
 
-	public async Task Delete${className}(${CSharp.BasicType[primaryKey.type as CSharp.BasicType]} ${getLowerCaseClassName(primaryKey.name)}){
-		${className} ${getLowerCaseClassName(className)} = await context.${pluralize(className)}.FindAsync(${getLowerCaseClassName(primaryKey.name)});
+	public async Task Delete${className}(${CSharp.BasicType[primaryKey.type as CSharp.BasicType]} ${toLowerCase(primaryKey.name)}){
+		${className} ${toLowerCase(className)} = await context.${pluralize(className)}.FindAsync(${toLowerCase(primaryKey.name)});
 
-		context.${pluralize(className)}.Remove(${getLowerCaseClassName(className)});
+		context.${pluralize(className)}.Remove(${toLowerCase(className)});
 
 		await context.SaveChangesAsync();
 	}
@@ -264,11 +285,11 @@ function generateBackendServiceInterface(parsedClass: CSharp.ParsedClass, classN
 	}
 
 	const interfaceContent: string = `public interface I${className}Service{
-	Task<${className}> Get${className}(${CSharp.BasicType[primaryKey.type as CSharp.BasicType]} ${getLowerCaseClassName(primaryKey.name)});
+	Task<${className}> Get${className}(${CSharp.BasicType[primaryKey.type as CSharp.BasicType]} ${toLowerCase(primaryKey.name)});
 	Task<List<${className}>> Get${pluralize(className)}();
 	Task<${className}> Create${className}(Create${className}Request request);
 	Task<${className}> Update${className}(Update${className}Request request);
-	Task Delete${className}(${CSharp.BasicType[primaryKey.type as CSharp.BasicType]} ${getLowerCaseClassName(primaryKey.name)});
+	Task Delete${className}(${CSharp.BasicType[primaryKey.type as CSharp.BasicType]} ${toLowerCase(primaryKey.name)});
 }`;
 
 	// Sort and remove duplicate usings
@@ -287,6 +308,81 @@ function generateBackendServiceInterface(parsedClass: CSharp.ParsedClass, classN
 	return fileContents;
 }
 
+function generateController(className: string, classNamespace: string): string {
+	/*
+		TODO
+		1. Add option for ProducesResponseType attributes
+		2. Sync vs. Async option, will affect service too
+		3. More options about response types (CreatedAtAction vs. Created vs. a normal 200 respones)
+	*/
+	const controllerNamespace: string = vscode.workspace.getConfiguration().get('csharp-bootstrapper.backend.controller.namespace', '');
+	const serviceNamespace: string = vscode.workspace.getConfiguration().get('csharp-bootstrapper.backend.service.namespace', '');
+	const serviceInterfaceNamespace: string = vscode.workspace.getConfiguration().get('csharp-bootstrapper.backend.service.interface.namespace', '');
+	
+	let usings: string[] = ['System', 'System.Threading.Tasks', 'System.Collections.Generic', 'Microsoft.AspNetCore.Mvc'];
+
+	addNamespace(usings, controllerNamespace, classNamespace);
+	addNamespace(usings, controllerNamespace, serviceNamespace);
+	addNamespace(usings, controllerNamespace, serviceInterfaceNamespace);
+
+	const classContent: string = `[ApiController]
+[Route("[controller]")]
+public class ${pluralize(className)}Controller: ControllerBase {
+
+	private readonly I${className}Service ${toLowerCase(className)}Service;
+
+	public ${pluralize(className)}Controller(I${className}Service ${toLowerCase(className)}Service){
+		this.${toLowerCase(className)}Service = ${toLowerCase(className)}Service ?? throw new ArgumentNullException(nameof(${toLowerCase(className)}Service));
+	}
+
+	[HttpGet("{id}")]
+	public async Task<${className}> Get${className}(int id){
+		return await ${toLowerCase(className)}Service.Get${className}(id);
+	}
+
+	[HttpGet]
+	public async Task<List<${className}>> Get${pluralize(className)}(){
+		return await ${toLowerCase(className)}Service.Get${pluralize(className)}();
+	}
+
+	[HttpPost]
+	public async Task<ActionResult<${className}>> Create${className}([FromBody] Create${className}Request request){
+		${className} ${toLowerCase(className)} = await ${toLowerCase(className)}Service.Create${className}(request);
+		return CreatedAtAction(nameof(Get${className}), new {id = ${toLowerCase(className)}.Id}, ${toLowerCase(className)});
+	}
+
+	[HttpPut("{id}")]
+	public async Task<ActionResult<${className}>> Update${className}([FromBody] Update${className}Request request, int id){
+		if(request.Id != id){
+			return BadRequest();
+		}
+
+		return await ${toLowerCase(className)}Service.Update${className}(request);
+	}
+
+	[HttpDelete("{id}")]
+	public async Task<IActionResult> Delete${className}(int id){
+		await ${toLowerCase(className)}Service.Delete${className}(id);
+		return NoContent();
+	}
+}`;
+
+	// Sort and remove duplicate usings
+	let fileContents: string = usings.filter((v, i, a) => a.indexOf(v) === i).sort().map(u => `using ${u};`).join('\n') + '\n\n';
+
+	// If we have a defined namespace, tab over the class and add it
+	if (controllerNamespace) {
+		fileContents = `${fileContents}namespace ${controllerNamespace} {
+	${classContent.replaceAll('\n','\n\t')}
+}`;
+	}
+	else {
+		fileContents += classContent;
+	}
+
+	return fileContents;
+}
+
 function getNamespaceName(documentText: string): string{
 	const match = documentText.match(/namespace\s+(\w+)/);
 	if(match){
@@ -295,8 +391,8 @@ function getNamespaceName(documentText: string): string{
 	return '';
 }
 
-function getLowerCaseClassName(className: string): string {
-	return className.charAt(0).toLowerCase() + className.slice(1);
+function toLowerCase(data: string): string {
+	return data.charAt(0).toLowerCase() + data.slice(1);
 }
 
 function addNamespace(usings: string[], fileNamespace: string, newNamespace: string): void {
