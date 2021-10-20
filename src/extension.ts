@@ -75,7 +75,7 @@ export function activate(context: vscode.ExtensionContext) {
 				// For each class, generate a controller, service, and service interface
 				for (let parsedClass of parsedClasses) {
 					// Backend service
-					const serviceFileContents = generateBackendService(parsedClass.className, namespaceName);
+					const serviceFileContents = generateBackendService(parsedClass, namespaceName);
 					const backendServiceDirectory = vscode.workspace.getConfiguration().get('csharp-bootstrapper.backend.service.directory', '');
 					const backendServicePath = path.join(rootPath, backendServiceDirectory, `${parsedClass.className}Service.cs`);
 
@@ -89,7 +89,7 @@ export function activate(context: vscode.ExtensionContext) {
 					}
 
 					// Backend service interface
-					const serviceInterfaceFileContents= generateBackendServiceInterface(parsedClass.className, namespaceName);
+					const serviceInterfaceFileContents = generateBackendServiceInterface(parsedClass, namespaceName);
 					const backendServiceInterfaceDirectory = vscode.workspace.getConfiguration().get('csharp-bootstrapper.backend.service.interface.directory', '');
 					const backendServiceInterfacePath = path.join(rootPath, backendServiceInterfaceDirectory, `I${parsedClass.className}Service.cs`);
 					
@@ -159,7 +159,7 @@ export class ${className} extends ${className}Dto {
 	return fileContents;
 }
 
-function generateBackendService(className: string, classNamespace: string): string {
+function generateBackendService(parsedClass: CSharp.ParsedClass, classNamespace: string): string {
 	/* TODO
 	 * 1. Find the actual DB name in the DBContext
 	 * 		a. Even if there are multiple DBContexts we should be able to use the passed in DBContext class name. 
@@ -189,6 +189,10 @@ function generateBackendService(className: string, classNamespace: string): stri
 	addNamespace(usings, serviceNamespace, classNamespace);
 	addNamespace(usings, serviceNamespace, serviceInterfaceNamespace);
 
+	const className: string = parsedClass.className;
+	// Assume that the first property is the primary key
+	const primaryKey: CSharp.Property = parsedClass.properties[0];
+
 	// Sort and remove duplicate usings
 	let serviceContents: string = usings.filter((v, i, a) => a.indexOf(v) === i).sort().map(u => `using ${u};`).join('\n') + '\n\n';
 
@@ -201,8 +205,8 @@ function generateBackendService(className: string, classNamespace: string): stri
 		this.context = context ?? throw new ArgumentNullException(nameof(context));
 	}
 
-	public async Task<${className}> Get${className}(int id){
-		return await context.${pluralize(className)}.FindAsync(id);
+	public async Task<${className}> Get${className}(${CSharp.BasicType[primaryKey.type as CSharp.BasicType]} ${toLowerCase(primaryKey.name)}){
+		return await context.${pluralize(className)}.FindAsync(${toLowerCase(primaryKey.name)});
 	}
 
 	public async Task<List<${className}>> Get${pluralize(className)}(){
@@ -220,7 +224,7 @@ function generateBackendService(className: string, classNamespace: string): stri
 	}
 
 	public async Task<${className}> Update${className}(Update${className}Request request){
-		${className} ${toLowerCase(className)} = await context.${pluralize(className)}.FindAsync(request.Id);
+		${className} ${toLowerCase(className)} = await context.${pluralize(className)}.FindAsync(request.${primaryKey.name});
 
 		${toLowerCase(className)} = mapper.Map<${className}>(request);
 
@@ -229,8 +233,8 @@ function generateBackendService(className: string, classNamespace: string): stri
 		return ${toLowerCase(className)};
 	}
 
-	public async Task Delete${className}(int id){
-		${className} ${toLowerCase(className)} = await context.${pluralize(className)}.FindAsync(id);
+	public async Task Delete${className}(${CSharp.BasicType[primaryKey.type as CSharp.BasicType]} ${toLowerCase(primaryKey.name)}){
+		${className} ${toLowerCase(className)} = await context.${pluralize(className)}.FindAsync(${toLowerCase(primaryKey.name)});
 
 		context.${pluralize(className)}.Remove(${toLowerCase(className)});
 
@@ -239,11 +243,11 @@ function generateBackendService(className: string, classNamespace: string): stri
 }
 
 public class Create${className}Request {
-
+${parsedClass.properties.slice(1).map(p => `\tpublic ${getPropertyString(p.type)}${p.nullable ? '?' : ''} ${p.name} { get; set; }`).join('\n')}
 }
 
 public class Update${className}Request {
-	public int Id {get; set;}
+${parsedClass.properties.map(p => `\tpublic ${getPropertyString(p.type)}${p.nullable ? '?' : ''} ${p.name} { get; set; }`).join('\n')}
 }`;
 
 	// If we have a defined namespace, tab over the class and add it
@@ -259,7 +263,7 @@ public class Update${className}Request {
 	return serviceContents;
 }
 
-function generateBackendServiceInterface(className: string, classNamespace: string): string {
+function generateBackendServiceInterface(parsedClass: CSharp.ParsedClass, classNamespace: string){
 	const serviceNamespace: string = vscode.workspace.getConfiguration().get('csharp-bootstrapper.backend.service.namespace', '');
 	const serviceInterfaceNamespace: string = vscode.workspace.getConfiguration().get('csharp-bootstrapper.backend.service.interface.namespace', '');
 	
@@ -268,12 +272,24 @@ function generateBackendServiceInterface(className: string, classNamespace: stri
 	addNamespace(usings, serviceInterfaceNamespace, classNamespace);
 	addNamespace(usings, serviceInterfaceNamespace, serviceNamespace);
 
+	const className: string = parsedClass.className;
+	// Assume that the first property is the primary key
+	const primaryKey: CSharp.Property = parsedClass.properties[0];
+
+	// If the first field in a basic type and starts with a capital letter, we will need to include the System namespace
+	if (typeof primaryKey.type === "number") {
+		const firstCharCode: number = CSharp.BasicType[primaryKey.type as CSharp.BasicType].charCodeAt(0);
+		if ("A".charCodeAt(0) <= firstCharCode && firstCharCode <= "Z".charCodeAt(0)) {
+			usings.push('System');
+		}
+	}
+
 	const interfaceContent: string = `public interface I${className}Service{
-	Task<${className}> Get${className}(int id);
+	Task<${className}> Get${className}(${CSharp.BasicType[primaryKey.type as CSharp.BasicType]} ${toLowerCase(primaryKey.name)});
 	Task<List<${className}>> Get${pluralize(className)}();
 	Task<${className}> Create${className}(Create${className}Request request);
 	Task<${className}> Update${className}(Update${className}Request request);
-	Task Delete${className}(int id);
+	Task Delete${className}(${CSharp.BasicType[primaryKey.type as CSharp.BasicType]} ${toLowerCase(primaryKey.name)});
 }`;
 
 	// Sort and remove duplicate usings
@@ -397,4 +413,25 @@ function addNamespace(usings: string[], fileNamespace: string, newNamespace: str
 			usings.push(newNamespace);
 		}
 	}
+}
+
+function getPropertyString(type: CSharp.Type): string {
+	// Takes in a CSharp Property object and produces a string with the correctly formatted property to use in a request model
+	let result = '';
+
+	// Basic type
+	if (typeof type === "number") {
+		result += CSharp.BasicType[type as CSharp.BasicType];
+	}
+	// User defined type
+	else if (type.hasOwnProperty('name')) {
+		result += (type as CSharp.UserDefinedType).name;
+	}
+	// Collection
+	else if (type.hasOwnProperty('collectionType')) {
+		result += CSharp.CollectionType[(type as CSharp.Collection).collectionType as CSharp.CollectionType];
+		result += `<${getPropertyString((type as CSharp.Collection).innerType)}>`;
+	}
+
+	return result;
 }
