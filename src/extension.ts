@@ -77,7 +77,7 @@ export function activate(context: vscode.ExtensionContext) {
 				// For each class, generate a controller, service, and service interface
 				for (let parsedClass of parsedClasses) {
 					// Backend service
-					const serviceFileContents = generateBackendService(parsedClass.className, namespaceName);
+					const serviceFileContents = generateBackendService(parsedClass, namespaceName);
 					const backendServiceDirectory = vscode.workspace.getConfiguration().get('csharp-bootstrapper.backend.service.directory', '');
 					const backendServicePath = path.join(rootPath, backendServiceDirectory, `${parsedClass.className}Service.cs`);
 
@@ -91,7 +91,7 @@ export function activate(context: vscode.ExtensionContext) {
 					}
 
 					// Backend service interface
-					const serviceInterfaceFileContents= generateBackendServiceInterface(parsedClass.className, namespaceName);
+					const serviceInterfaceFileContents = generateBackendServiceInterface(parsedClass, namespaceName);
 					const backendServiceInterfaceDirectory = vscode.workspace.getConfiguration().get('csharp-bootstrapper.backend.service.interface.directory', '');
 					const backendServiceInterfacePath = path.join(rootPath, backendServiceInterfaceDirectory, `I${parsedClass.className}Service.cs`);
 					

@@ -1,3 +1,5 @@
+import { CSharp } from './csharp';
+
 export function getNamespaceName(documentText: string): string{
 	const match = documentText.match(/namespace\s+(\w+)/);
 	if(match){
@@ -28,4 +30,25 @@ export function addNamespace(usings: string[], fileNamespace: string, newNamespa
 			usings.push(newNamespace);
 		}
 	}
+}
+
+export function getPropertyString(type: CSharp.Type): string {
+	// Takes in a CSharp Property object and produces a string with the correctly formatted property to use in a request model
+	let result = '';
+
+	// Basic type
+	if (typeof type === "number") {
+		result += CSharp.BasicType[type as CSharp.BasicType];
+	}
+	// User defined type
+	else if (type.hasOwnProperty('name')) {
+		result += (type as CSharp.UserDefinedType).name;
+	}
+	// Collection
+	else if (type.hasOwnProperty('collectionType')) {
+		result += CSharp.CollectionType[(type as CSharp.Collection).collectionType as CSharp.CollectionType];
+		result += `<${getPropertyString((type as CSharp.Collection).innerType)}>`;
+	}
+
+	return result;
 }

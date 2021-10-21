@@ -19,11 +19,11 @@ export namespace CSharp {
 	}
 
 	function parseType(unparsedType: string): Type {
-		let collectionMatch = unparsedType.match(`(?:${Object.keys(CollectionType).filter(k => isNaN(<any>k)).join('|')})<(.*)>$`);
+		let collectionMatch = unparsedType.match(`(${Object.keys(CollectionType).filter(k => isNaN(<any>k)).join('|')})<(.*)>$`);
 		if (collectionMatch?.[0]) {
 			return <Collection>{
-				innerType: parseType(collectionMatch[1]),
-				collectionType: CollectionType[collectionMatch[0] as keyof typeof CollectionType]
+				innerType: parseType(collectionMatch[2]),
+				collectionType: CollectionType[collectionMatch[1] as keyof typeof CollectionType]
 			};
 		}
 		return BasicType[unparsedType as keyof typeof BasicType] ?? <UserDefinedType>{
@@ -98,7 +98,7 @@ export namespace CSharp {
 		// TODO: Also handle generic types?
 	}
 
-	enum CollectionType {
+	export enum CollectionType {
 		/* eslint-disable @typescript-eslint/naming-convention */
 		Dictionary,
 		List,
@@ -115,5 +115,5 @@ export namespace CSharp {
 		/* eslint-disable @typescript-eslint/naming-convention */
 	}
 
-	type Type = BasicType | UserDefinedType | Collection;
+	export type Type = BasicType | UserDefinedType | Collection;
 }
