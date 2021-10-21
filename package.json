@@ -52,7 +52,7 @@
 		"viewsWelcome": [
 			{
 				"view": "options",
-				"contents": "Welcome to C# Bootstrapper!\n Click the button below to navigate to the configuration settings for your project.\nFile paths are relative to the workspace folder.\n[Settings](command:csharp-bootstrapper.settings)"
+				"contents": "Welcome to C# Bootstrapper!\n Click the button below to navigate to the configuration settings for your project.\nFile paths are relative to the workspace folder.\n[Settings](command:csharp-bootstrapper.settings-gui)"
 			}
 		],
 		"configuration": [
@@ -172,6 +172,7 @@
 	"dependencies": {
 		"@types/pluralize": "0.0.29",
 		"@vscode/webview-ui-toolkit": "^0.8.2",
-		"pluralize": "^8.0.0"
+		"pluralize": "^8.0.0",
+		"shiki": "^0.9.12"
 	}
 }

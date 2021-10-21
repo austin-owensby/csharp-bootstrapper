@@ -11,7 +11,7 @@ export class SettingsPanel {
     this.panel = panel;
     this.extensionUri = extensionUri;
     this.panel.onDidDispose(this.dispose, null, this.disposables);
-    this.panel.webview.html = this.getWebviewContent(this.panel.webview, this.extensionUri);
+    this.setWebviewContent(this.panel.webview, this.extensionUri);
     this.setWebviewMessageListener(this.panel.webview);
   }
 
@@ -40,7 +40,7 @@ export class SettingsPanel {
     }
   }
 
-  private getWebviewContent(webview: vscode.Webview, extensionUri: vscode.Uri) {
+  private async setWebviewContent(webview: vscode.Webview, extensionUri: vscode.Uri) {
     const toolkitUri = getUri(webview, extensionUri, [
         "node_modules",
         "@vscode",
@@ -56,7 +56,29 @@ export class SettingsPanel {
     // Ex. config section = csharp-bootstrapper.backend.service.directory
     // <vscode-text-field id="backend-service-directory" class="config" value="${vscode.workspace.getConfiguration().get("csharp-bootstrapper.backend.service-directory")}">Service Directory</vscode-text-field>
 
-    return /*html*/ `
+    const shiki = require('shiki');
+
+    const codeBlock = await shiki
+      .getHighlighter({
+        theme: 'dark-plus'
+      })
+      .then((highlighter: any) => {
+        return highlighter.codeToHtml(`namespace Project.Models
+{
+    public class Student
+    {
+        public int StudentID { get; set; }
+        public string StudentName { get; set; }
+        public DateTime? DateOfBirth { get; set; }
+        public byte[]  Photo { get; set; }
+        public decimal Height { get; set; }
+        public float Weight { get; set; }
+        public Grade  Grade { get; set; }
+    }
+}`, 'csharp');
+      });
+
+      this.panel.webview.html = /*html*/ `
       <!DOCTYPE html>
       <html lang="en">
         <head>
@@ -65,25 +87,6 @@ export class SettingsPanel {
           <script type="module" src="${toolkitUri}"></script>
           <script type="module" src="${mainUri}"></script>
           <title>C# Bootstrapper Extension Settings</title>
-          <style>
-            .code-block{
-              background-color: #3c3c3c;
-              font-family: Consolas,"Courier New",Courier,Monospace;
-              color: #499cd5;
-            }
-
-            .code-block .object{
-              color: #39c8b0;
-            }
-
-            .code-block .field{
-              color: #9cdcfe;
-            }
-
-            .code-block .symbol{
-              color: white;
-            }
-          </style>
         </head>
         <body>
           <vscode-panels>
@@ -99,21 +102,7 @@ export class SettingsPanel {
                 <vscode-text-field id="backend-dbcontext-name" class="config" value="${vscode.workspace.getConfiguration().get("csharp-bootstrapper.backend.dbcontext.name")}">DBContext Name</vscode-text-field>
                 <vscode-text-field id="backend-dbcontext-namespace" class="config" value="${vscode.workspace.getConfiguration().get("csharp-bootstrapper.backend.dbcontext.namespace")}">DBContext Namespace</vscode-text-field>
                 <h2>Model Example</h2>
-                <pre class="code-block">
-  namespace Project.Models
-  <span class="symbol">{</span>
-      public class <span class="object">Student</span>
-      <span class="symbol">{</span>
-          public int <span class="field">StudentID</span> <span class="symbol">{</span> get<span class="symbol">;</span> set<span class="symbol">;</span> <span class="symbol">}</span>
-          public string <span class="field">StudentName</span> <span class="symbol">{</span> get<span class="symbol">;</span> set<span class="symbol">;</span> <span class="symbol">}</span>
-          public <span class="object">DateTime</span><span class="symbol">?</span> <span class="field">DateOfBirth</span> <span class="symbol">{</span> get<span class="symbol">;</span> set<span class="symbol">;</span> <span class="symbol">}</span>
-          public byte<span class="symbol">[]</span>  <span class="field">Photo</span> <span class="symbol">{</span> get<span class="symbol">;</span> set<span class="symbol">;</span> <span class="symbol">}</span>
-          public decimal <span class="field">Height</span> <span class="symbol">{</span> get<span class="symbol">;</span> set<span class="symbol">;</span> <span class="symbol">}</span>
-          public float <span class="field">Weight</span> <span class="symbol">{</span> get<span class="symbol">;</span> set<span class="symbol">;</span> <span class="symbol">}</span>
-          public <span class="object">Grade</span>  <span class="field">Grade</span> <span class="symbol">{</span> get<span class="symbol">;</span> set<span class="symbol">;</span> <span class="symbol">}</span>
-      <span class="symbol">}</span>
-  <span class="symbol">}</span>
-                </pre>
+                ${codeBlock}
               </section>
             </vscode-panel-view>
             <vscode-panel-view id="view-service">
@@ -160,7 +149,7 @@ export class SettingsPanel {
         await vscode.workspace.getConfiguration('csharp-bootstrapper').update(config, value);
         
         // Update html with the new values (That way you can navigate away from the WebView and come back and see the correct values)
-        webview.html = this.getWebviewContent(webview, this.extensionUri);
+        this.setWebviewContent(webview, this.extensionUri);
       },
       undefined,
       this.disposables
