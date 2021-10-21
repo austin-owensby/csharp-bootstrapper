@@ -51,7 +51,7 @@
 		"viewsWelcome": [
 			{
 				"view": "options",
-				"contents": "Welcome to C# Bootstrapper!\n Click the button below to navigate to the configuration settings for your project.\nFile paths are relative to the workspace folder.\n[Settings](command:csharp-bootstrapper.settings-gui)"
+				"contents": "Welcome to C# Bootstrapper!\n Click the button below to navigate to the configuration settings for your project.\nFile paths are relative to the workspace folder.\n[Settings](command:csharp-bootstrapper.settings)"
 			}
 		],
 		"configuration": [

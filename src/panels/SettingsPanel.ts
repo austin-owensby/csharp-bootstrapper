@@ -98,6 +98,11 @@ export class SettingsPanel {
             <vscode-panel-view id="view-general"> 
               <section style="display: flex; flex-direction: column; width: 100%;">
                 <h1 style="margin-top: 0;">General Settings</h1>
+                <h2>Directories</h2>
+                <vscode-text-field id="frontend-model-directory" class="config" value="${vscode.workspace.getConfiguration().get("csharp-bootstrapper.frontend.model.directory")}">Frontend Model</vscode-text-field>
+                <vscode-text-field id="backend-controller-directory" class="config" value="${vscode.workspace.getConfiguration().get("csharp-bootstrapper.backend.controller.directory")}">Controller</vscode-text-field>
+                <vscode-text-field id="backend-service-interface-directory" class="config" value="${vscode.workspace.getConfiguration().get("csharp-bootstrapper.backend.service.interface.directory")}">Service Interface</vscode-text-field>
+                <vscode-text-field id="backend-service-directory" class="config" value="${vscode.workspace.getConfiguration().get("csharp-bootstrapper.backend.service.directory")}">Backend Service</vscode-text-field>
                 <h2>DB Context</h2>
                 <vscode-text-field id="backend-dbcontext-name" class="config" value="${vscode.workspace.getConfiguration().get("csharp-bootstrapper.backend.dbcontext.name")}">DBContext Name</vscode-text-field>
                 <vscode-text-field id="backend-dbcontext-namespace" class="config" value="${vscode.workspace.getConfiguration().get("csharp-bootstrapper.backend.dbcontext.namespace")}">DBContext Namespace</vscode-text-field>

@@ -164,7 +164,7 @@ export function generateBackendServiceInterface(parsedClass: CSharp.ParsedClass,
 	return fileContents;
 }
 
-export function generateController(className: string, classNamespace: string): string {
+export function generateController(parsedClass: CSharp.ParsedClass, classNamespace: string): string {
 	/*
 		TODO
 		1. Add option for ProducesResponseType attributes
@@ -177,6 +177,18 @@ export function generateController(className: string, classNamespace: string): s
 	
 	let usings: string[] = ['System', 'System.Threading.Tasks', 'System.Collections.Generic', 'Microsoft.AspNetCore.Mvc'];
 
+	const className: string = parsedClass.className;
+	// Assume that the first property is the primary key
+	const primaryKey: CSharp.Property = parsedClass.properties[0];
+
+	// If the first field in a basic type and starts with a capital letter, we will need to include the System namespace
+	if (typeof primaryKey.type === "number") {
+		const firstCharCode: number = CSharp.BasicType[primaryKey.type as CSharp.BasicType].charCodeAt(0);
+		if ("A".charCodeAt(0) <= firstCharCode && firstCharCode <= "Z".charCodeAt(0)) {
+			usings.push('System');
+		}
+	}
+
 	addNamespace(usings, controllerNamespace, classNamespace);
 	addNamespace(usings, controllerNamespace, serviceNamespace);
 	addNamespace(usings, controllerNamespace, serviceInterfaceNamespace);
@@ -185,32 +197,38 @@ export function generateController(className: string, classNamespace: string): s
 [Route("[controller]")]
 public class ${pluralize(className)}Controller: ControllerBase {
 	private readonly I${className}Service ${toLowerCase(className)}Service;
+	
 	public ${pluralize(className)}Controller(I${className}Service ${toLowerCase(className)}Service){
 		this.${toLowerCase(className)}Service = ${toLowerCase(className)}Service ?? throw new ArgumentNullException(nameof(${toLowerCase(className)}Service));
 	}
-	[HttpGet("{id}")]
-	public async Task<${className}> Get${className}(int id){
-		return await ${toLowerCase(className)}Service.Get${className}(id);
+
+	[HttpGet("{${toLowerCase(primaryKey.name)}}")]
+	public async Task<${className}> Get${className}(${CSharp.BasicType[primaryKey.type as CSharp.BasicType]} ${toLowerCase(primaryKey.name)}){
+		return await ${toLowerCase(className)}Service.Get${className}(${toLowerCase(primaryKey.name)});
 	}
+
 	[HttpGet]
 	public async Task<List<${className}>> Get${pluralize(className)}(){
 		return await ${toLowerCase(className)}Service.Get${pluralize(className)}();
 	}
+
 	[HttpPost]
 	public async Task<ActionResult<${className}>> Create${className}([FromBody] Create${className}Request request){
 		${className} ${toLowerCase(className)} = await ${toLowerCase(className)}Service.Create${className}(request);
-		return CreatedAtAction(nameof(Get${className}), new {id = ${toLowerCase(className)}.Id}, ${toLowerCase(className)});
+		return CreatedAtAction(nameof(Get${className}), new {${toLowerCase(primaryKey.name)} = ${toLowerCase(className)}.${primaryKey.name}}, ${toLowerCase(className)});
 	}
-	[HttpPut("{id}")]
-	public async Task<ActionResult<${className}>> Update${className}([FromBody] Update${className}Request request, int id){
-		if(request.Id != id){
+	
+	[HttpPut("{${toLowerCase(primaryKey.name)}}")]
+	public async Task<ActionResult<${className}>> Update${className}([FromBody] Update${className}Request request, ${CSharp.BasicType[primaryKey.type as CSharp.BasicType]} ${toLowerCase(primaryKey.name)}){
+		if(request.${primaryKey.name} != ${toLowerCase(primaryKey.name)}){
 			return BadRequest();
 		}
 		return await ${toLowerCase(className)}Service.Update${className}(request);
 	}
-	[HttpDelete("{id}")]
-	public async Task<IActionResult> Delete${className}(int id){
-		await ${toLowerCase(className)}Service.Delete${className}(id);
+
+	[HttpDelete("{${toLowerCase(primaryKey.name)}}")]
+	public async Task<IActionResult> Delete${className}(${CSharp.BasicType[primaryKey.type as CSharp.BasicType]} ${toLowerCase(primaryKey.name)}){
+		await ${toLowerCase(className)}Service.Delete${className}(${toLowerCase(primaryKey.name)});
 		return NoContent();
 	}
 }`;

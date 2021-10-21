@@ -4,7 +4,7 @@ import * as path from 'path';
 import { SettingsPanel } from './panels/settingsPanel';
 import { CSharp } from './utilities/csharp';
 import { getNamespaceName } from './utilities/helpers';
-import { generateTypescriptClass, generateController , generateBackendService, generateBackendServiceInterface } from './utilities/generateFiles';
+import * as generate from  './utilities/generateFiles';
 
 export function activate(context: vscode.ExtensionContext) {
 	let rootPath: string = '';
@@ -30,7 +30,7 @@ export function activate(context: vscode.ExtensionContext) {
 					const frontendTargetDirectory: string = vscode.workspace.getConfiguration().get('csharp-bootstrapper.frontend.model.directory', '');
 					const modelPath: string = path.join(rootPath, frontendTargetDirectory, `${parsedClass.className}.ts`);
 
-					const fileContents: string = generateTypescriptClass(parsedClass.className);
+					const fileContents: string = generate.generateTypescriptClass(parsedClass.className);
 
 					try {
 						fs.writeFileSync(modelPath, fileContents);
@@ -69,7 +69,7 @@ export function activate(context: vscode.ExtensionContext) {
 				// For each class, generate a controller, service, and service interface
 				for (let parsedClass of parsedClasses) {
 					// Backend service
-					const serviceFileContents = generateBackendService(parsedClass, namespaceName);
+					const serviceFileContents = generate.generateBackendService(parsedClass, namespaceName);
 					const backendServiceDirectory = vscode.workspace.getConfiguration().get('csharp-bootstrapper.backend.service.directory', '');
 					const backendServicePath = path.join(rootPath, backendServiceDirectory, `${parsedClass.className}Service.cs`);
 
@@ -83,7 +83,7 @@ export function activate(context: vscode.ExtensionContext) {
 					}
 
 					// Backend service interface
-					const serviceInterfaceFileContents = generateBackendServiceInterface(parsedClass, namespaceName);
+					const serviceInterfaceFileContents = generate.generateBackendServiceInterface(parsedClass, namespaceName);
 					const backendServiceInterfaceDirectory = vscode.workspace.getConfiguration().get('csharp-bootstrapper.backend.service.interface.directory', '');
 					const backendServiceInterfacePath = path.join(rootPath, backendServiceInterfaceDirectory, `I${parsedClass.className}Service.cs`);
 					
@@ -97,7 +97,7 @@ export function activate(context: vscode.ExtensionContext) {
 					}				
 					
 					// Controller
-					const controllerFileContents= generateController(parsedClass.className, namespaceName);
+					const controllerFileContents = generate.generateController(parsedClass, namespaceName);
 					const backendControllerDirectory = vscode.workspace.getConfiguration().get('csharp-bootstrapper.backend.controller.directory', '');
 					const backendControllerPath = path.join(rootPath, backendControllerDirectory, `${parsedClass.className}Controller.cs`);
 					
