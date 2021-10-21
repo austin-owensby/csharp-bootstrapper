@@ -18,9 +18,7 @@ In addition it will have configurations allowing the API generation to be flexib
 
 * `csharp-boostrapper.boostrap-crud`: Generates a CRUD workflow based on the configurations.
 
-* `csharp-bootstrapper.settings`: Navigates to the extension settings.
-
-* `csharp-bootstrapper.settings-gui`: Displays a WebView GUI with the extension settings.
+* `csharp-bootstrapper.settings`: Displays a WebView GUI with the extension settings.
 
 ### Environment Setup
 

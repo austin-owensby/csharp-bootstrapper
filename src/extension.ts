@@ -12,14 +12,6 @@ export function activate(context: vscode.ExtensionContext) {
 		rootPath = vscode.workspace.workspaceFolders[0].uri.fsPath;
 	}
 
-	// Navigate to the Workspace's settings
-	context.subscriptions.push(vscode.commands.registerCommand('csharp-bootstrapper.settings', () => {
-		// For some reason this is really finikey and the only reliable way to trigger this
-		vscode.commands.executeCommand('workbench.action.openWorkspaceSettings');
-		vscode.commands.executeCommand('workbench.action.openSettings', 'csharp-bootstrapper');
-		vscode.commands.executeCommand('workbench.action.openWorkspaceSettings');
-	}));
-
 	// Generate a Typescript file based on the current C# model
 	context.subscriptions.push(vscode.commands.registerCommand('csharp-bootstrapper.convert-model', (uri: vscode.Uri) => {
 		try {
@@ -130,7 +122,7 @@ export function activate(context: vscode.ExtensionContext) {
 	}));
 
 	// Display a WebView to edit settings through a more focused GUI
-	context.subscriptions.push(vscode.commands.registerCommand('csharp-bootstrapper.settings-gui', () => {
+	context.subscriptions.push(vscode.commands.registerCommand('csharp-bootstrapper.settings', () => {
 		SettingsPanel.render(context.extensionUri);
 	}));
 }

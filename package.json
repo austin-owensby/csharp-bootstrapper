@@ -27,8 +27,7 @@
 	"activationEvents": [
 		"onCommand:csharp-bootstrapper.convert-model",
 		"onCommand:csharp-bootstrapper.bootstrap-crud",
-		"onCommand:csharp-bootstrapper.settings",
-		"onCommand:csharp-bootstrapper.settings-gui"
+		"onCommand:csharp-bootstrapper.settings"
 	],
 	"main": "./out/extension.js",
 	"contributes": {
@@ -119,10 +118,6 @@
 			{
 				"command": "csharp-bootstrapper.settings",
 				"title": "C# Boostrapper Extension Workplace Settings"
-			},
-			{
-				"command": "csharp-bootstrapper.settings-gui",
-				"title": "C# Boostrapper Extension Workplace Settings GUI"
 			}
 		],
 		"menus": {
