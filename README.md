@@ -74,6 +74,8 @@ This extension contributes the following settings:
 ## Known Issues
 
 - Regex does not cover all cases for the C# class
+- Typescript model does not use C# class fields
+- Frontend service is not generated
 
 ## Release Notes
 
@@ -84,3 +86,8 @@ Initial testing of publishing the extension
 ### 0.0.1 - 0.0.4
 
 Scaffolding out of project. Added simple view and command to generate tpyescript template at a configured path.
+
+### 0.0.5
+Basic parsing of classes using Regex
+Bootstrapping of Service, Service Interface, and Controller
+Settings GUI
