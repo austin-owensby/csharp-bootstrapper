@@ -16,9 +16,9 @@ In addition it will have configurations allowing the API generation to be flexib
 
 * `csharp-bootstrapper.convert-model`: Converts the C# model to a typescript model at the configured folder.
 
-* `csharp-boostrapper.boostrap-crud` Generates a CRUD workflow based on the configurations.
+* `csharp-boostrapper.boostrap-crud`: Generates a CRUD workflow based on the configurations.
 
-* `csharp-bootstrapper.settings` Navigates to the extension settings.
+* `csharp-bootstrapper.settings`: Displays a WebView GUI with the extension settings.
 
 ### Environment Setup
 
@@ -27,7 +27,14 @@ How do we set up the environement?
 
 ### Conventions
 
-What coding conventions?
+#### Settings GUI
+
+Each input should have the class "config"
+Also an id formatted similiar to the config section
+
+Ex. config section = csharp-bootstrapper.backend.service.directory
+
+`<vscode-text-field id="backend-service-directory" class="config" value="${vscode.workspace.getConfiguration().get("csharp-bootstrapper.backend.service-directory")}">Service Directory</vscode-text-field>`
 
 ### Testing
 
@@ -47,26 +54,28 @@ This extension contributes the following settings:
 
 #### Controller
 
-* `csharp-bootstrapper.backend.controller.directory` The directory that backend C# Controller should be added.
-* `csharp-bootstrapper.backend.controller.namespace` The namespace of the backend C# Controller.
+* `csharp-bootstrapper.backend.controller.directory`: The directory that backend C# Controller should be added.
+* `csharp-bootstrapper.backend.controller.namespace`: The namespace of the backend C# Controller.
 
 #### Service
 
-* `csharp-bootstrapper.backend.service.directory` The directory that backend C# Service should be added.
-* `csharp-bootstrapper.backend.service.namespace` The namespace of the backend C# Service.
+* `csharp-bootstrapper.backend.service.directory`: The directory that backend C# Service should be added.
+* `csharp-bootstrapper.backend.service.namespace`: The namespace of the backend C# Service.
 
 ##### Interface
-* `csharp-bootstrapper.backend.service.interface.directory` The directory that backend C# Service Interface should be added.
-* `csharp-bootstrapper.backend.service.interface.namespace` The namespace of the backend C# Service Interface.
+* `csharp-bootstrapper.backend.service.interface.directory`: The directory that backend C# Service Interface should be added.
+* `csharp-bootstrapper.backend.service.interface.namespace`: The namespace of the backend C# Service Interface.
 
 #### DB Context
 
-* `csharp-bootstrapper.backend.dbcontext.name` The name of the Database Context class.
-* `csharp-bootstrapper.backend.dbcontext.namespace` The namespace of the Database Context class.
+* `csharp-bootstrapper.backend.dbcontext.name`: The name of the Database Context class.
+* `csharp-bootstrapper.backend.dbcontext.namespace`: The namespace of the Database Context class.
 
 ## Known Issues
 
-WIP extension :)
+- Regex does not cover all cases for the C# class
+- Typescript model does not use C# class fields
+- Frontend service is not generated
 
 ## Release Notes
 
@@ -77,3 +86,8 @@ Initial testing of publishing the extension
 ### 0.0.1 - 0.0.4
 
 Scaffolding out of project. Added simple view and command to generate tpyescript template at a configured path.
+
+### 0.0.5
+Basic parsing of classes using Regex
+Bootstrapping of Service, Service Interface, and Controller
+Settings GUI
