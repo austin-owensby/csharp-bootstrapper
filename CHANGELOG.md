@@ -10,3 +10,9 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 - Added Activity bar icon with welcome view
 - Added configuration (Frontend model directory)
 - C# Context menu and Editor menu command to generate Typescript file template based off of C# model
+
+
+### 0.0.5
+ - Basic parsing of classes using Regex
+ - Bootstrapping of Service, Service Interface, and Controller
+ - Settings GUI
