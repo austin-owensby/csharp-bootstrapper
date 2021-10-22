@@ -47,7 +47,9 @@ export class SettingsPanel {
   // Generates the html for the webview and sets it
   private async setWebviewContent(webview: vscode.Webview, extensionUri: vscode.Uri) {    
     // Generate code block examples
-    const documentText = `namespace Project.Models
+    const documentText = `using System;
+
+namespace Project.Models
 {
     public class Student
     {
