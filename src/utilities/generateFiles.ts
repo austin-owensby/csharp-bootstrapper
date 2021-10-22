@@ -3,7 +3,14 @@ import * as vscode from 'vscode';
 import { toLowerCase, addNamespace, getPropertyString } from './helpers';
 import { CSharp } from './csharp';
 
-export function generateTypescriptClass(className: string): string {
+export function generateTypescriptClass(parsedClass: CSharp.ParsedClass): string {
+	/* TODO
+		1. Parse fields from the class
+		2. Import other models
+		3. Parse enums
+	*/
+	const className: string = parsedClass.className;
+
 	let fileContents: string = `export interface I${className} {\n`;
 
 
@@ -28,7 +35,7 @@ export class ${className} extends ${className}Dto {
 }
 `;
 
-	return fileContents;
+	return fileContents.replaceAll('\t', '  ');
 }
 
 export function generateBackendService(parsedClass: CSharp.ParsedClass, classNamespace: string): string {
@@ -37,18 +44,15 @@ export function generateBackendService(parsedClass: CSharp.ParsedClass, classNam
 	 * 		a. Even if there are multiple DBContexts we should be able to use the passed in DBContext class name. 
 	 * 			Maybe instead of having a DBContext name and namespace we should have a file path to it.
 	 * 		b. Need to determine what to do if the are multiple DBSets for 1 class
-	 * 2. Determine the Primary Key from the C# model
-	 * 3. Generate Request classes based on the C# model
-	 * 		a. Might need to add in a configruation on if we want to include children in the Request model
-	 * 4. Add exceptions for Not Found responses
-	 * 5. Will probably need to fix the assumption that we can just use Microsoft.EntityFrameworkCore as the DB context
-	 * 6. Need to consider what to do if multiple classes in same file when scaffolding CRUD, currently just take the first
-	 * 7. Need to consider where AutoMapper file lives
-	 * 8. Need to consider where to add service injection
-	 * 9. Filename suffix schemes (Controller vs Service vs RequestHandler, etc)
-	 * 10. Logging
-	 * 11. Whether or not there are separate models for repo and db objects
-	 * 12. Binding models vs dtos
+	 * 2. Might need to add in a configruation on if we want to include children in the Request model
+	 * 3. Add exceptions for Not Found responses
+	 * 4. Will probably need to fix the assumption that we can just use Microsoft.EntityFrameworkCore as the DB context
+	 * 5. Need to consider where AutoMapper file lives
+	 * 6. Need to consider where to add service injection
+	 * 7. Filename suffix schemes (Controller vs Service vs RequestHandler, etc)
+	 * 8. Logging
+	 * 9. Whether or not there are separate models for repo and db objects
+	 * 10. Binding models vs dtos
 	*/
 	const dbContext: string = vscode.workspace.getConfiguration().get('csharp-bootstrapper.backend.dbcontext.name', 'DBContext');
 	const dbContextNamespace: string = vscode.workspace.getConfiguration().get('csharp-bootstrapper.backend.dbcontext.namespace', '');
@@ -71,37 +75,45 @@ export function generateBackendService(parsedClass: CSharp.ParsedClass, classNam
 	const classContent: string = `public class ${className}Service: I${className}Service {
 	private readonly IMapper mapper;
 	private readonly ${dbContext} context;
+
 	public ${className}Service(IMapper mapper, ${dbContext} context){
 		this.mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
 		this.context = context ?? throw new ArgumentNullException(nameof(context));
 	}
+
 	public async Task<${className}> Get${className}(${CSharp.BasicType[primaryKey.type as CSharp.BasicType]} ${toLowerCase(primaryKey.name)}){
 		return await context.${pluralize(className)}.FindAsync(${toLowerCase(primaryKey.name)});
 	}
+
 	public async Task<List<${className}>> Get${pluralize(className)}(){
 		return await context.${pluralize(className)}.ToListAsync();
 	}
+
 	public async Task<${className}> Create${className}(Create${className}Request request){
 		${className} ${toLowerCase(className)} = mapper.Map<${className}>(request);
 		context.${pluralize(className)}.Add(${toLowerCase(className)});
 		await context.SaveChangesAsync();
 		return ${toLowerCase(className)};
 	}
+
 	public async Task<${className}> Update${className}(Update${className}Request request){
 		${className} ${toLowerCase(className)} = await context.${pluralize(className)}.FindAsync(request.${primaryKey.name});
 		${toLowerCase(className)} = mapper.Map<${className}>(request);
 		await context.SaveChangesAsync();
 		return ${toLowerCase(className)};
 	}
+
 	public async Task Delete${className}(${CSharp.BasicType[primaryKey.type as CSharp.BasicType]} ${toLowerCase(primaryKey.name)}){
 		${className} ${toLowerCase(className)} = await context.${pluralize(className)}.FindAsync(${toLowerCase(primaryKey.name)});
 		context.${pluralize(className)}.Remove(${toLowerCase(className)});
 		await context.SaveChangesAsync();
 	}
 }
+
 public class Create${className}Request {
 ${parsedClass.properties.slice(1).map(p => `\tpublic ${getPropertyString(p.type)}${p.nullable ? '?' : ''} ${p.name} { get; set; }`).join('\n')}
 }
+
 public class Update${className}Request {
 ${parsedClass.properties.map(p => `\tpublic ${getPropertyString(p.type)}${p.nullable ? '?' : ''} ${p.name} { get; set; }`).join('\n')}
 }`;
@@ -152,7 +164,7 @@ export function generateBackendServiceInterface(parsedClass: CSharp.ParsedClass,
 	let fileContents: string = usings.filter((v, i, a) => a.indexOf(v) === i).sort().map(u => `using ${u};`).join('\n') + '\n\n';
 
 	// If we have a defined namespace, tab over the interface and add it
-	if (serviceNamespace) {
+	if (serviceInterfaceNamespace) {
 		fileContents = `${fileContents}namespace ${serviceInterfaceNamespace} {
 	${interfaceContent.replaceAll('\n','\n\t')}
 }`;

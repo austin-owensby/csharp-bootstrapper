@@ -1,10 +1,10 @@
 import * as vscode from 'vscode';
 import * as fs from 'fs';
 import * as path from 'path';
+import * as generate from  './utilities/generateFiles';
 import { SettingsPanel } from './panels/settingsPanel';
 import { CSharp } from './utilities/csharp';
 import { getNamespaceName } from './utilities/helpers';
-import * as generate from  './utilities/generateFiles';
 
 export function activate(context: vscode.ExtensionContext) {
 	let rootPath: string = '';
@@ -30,7 +30,7 @@ export function activate(context: vscode.ExtensionContext) {
 					const frontendTargetDirectory: string = vscode.workspace.getConfiguration().get('csharp-bootstrapper.frontend.model.directory', '');
 					const modelPath: string = path.join(rootPath, frontendTargetDirectory, `${parsedClass.className}.ts`);
 
-					const fileContents: string = generate.generateTypescriptClass(parsedClass.className);
+					const fileContents: string = generate.generateTypescriptClass(parsedClass);
 
 					try {
 						fs.writeFileSync(modelPath, fileContents);
