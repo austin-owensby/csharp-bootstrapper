@@ -10,6 +10,14 @@ function main() {
   for(let input of inputs){
     input.addEventListener("change", handleConfigChange);
   }
+
+  // All tabs should have the 'tabs' class in order to save when realoading the WebView
+  const tabs = document.getElementsByClassName("tabs");
+
+  // Setup a change event listerner for each tab
+  for(let tab of tabs){
+    tab.addEventListener("click", handleTabClick);
+  }
 }
 
 function handleConfigChange(event) {
@@ -18,5 +26,14 @@ function handleConfigChange(event) {
   vscode.postMessage({
     config: `${event.target.id.replaceAll('-','.')}`,
     value: event.target.value
+  });
+}
+
+function handleTabClick(event){
+  // When the config input has been updated, let the extension know of the change
+  // The id of the input should be formatted similiar to the config section
+  vscode.postMessage({
+    config: `${event.target.id}`,
+    value: ''
   });
 }

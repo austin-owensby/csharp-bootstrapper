@@ -10,6 +10,7 @@ export class SettingsPanel {
   private readonly panel: vscode.WebviewPanel;
   private readonly extensionUri: vscode.Uri;
   private disposables: vscode.Disposable[] = [];
+  private activeId: string = 'general';
 
   private constructor(panel: vscode.WebviewPanel, extensionUri: vscode.Uri) {
     this.panel = panel;
@@ -45,7 +46,7 @@ export class SettingsPanel {
   }
 
   // Generates the html for the webview and sets it
-  private async setWebviewContent(webview: vscode.Webview, extensionUri: vscode.Uri) {    
+  private async setWebviewContent(webview: vscode.Webview, extensionUri: vscode.Uri) {
     // Generate code block examples
     const documentText = `using System;
 
@@ -171,17 +172,17 @@ namespace Project.Models
             }
 
             ul li.file:before{
-              content: '🗎';
+              content: '📄';
             }
           </style>
         </head>
         <body>
-          <vscode-panels>
-            <vscode-panel-tab id="general">General</vscode-panel-tab>
-            <vscode-panel-tab id="service">Service</vscode-panel-tab>
-            <vscode-panel-tab id="controller">Controller</vscode-panel-tab>
-            <vscode-panel-tab id="frontend-service">Frontend Service</vscode-panel-tab>
-            <vscode-panel-tab id="frontend-model">Frontend Model</vscode-panel-tab>
+          <vscode-panels activeid=${this.activeId}>
+            <vscode-panel-tab id="general" class="tabs">General</vscode-panel-tab>
+            <vscode-panel-tab id="service" class="tabs">Service</vscode-panel-tab>
+            <vscode-panel-tab id="controller" class="tabs">Controller</vscode-panel-tab>
+            <vscode-panel-tab id="frontend-service" class="tabs">Frontend Service</vscode-panel-tab>
+            <vscode-panel-tab id="frontend-model" class="tabs">Frontend Model</vscode-panel-tab>
             <vscode-panel-view id="view-general"> 
               <section style="display: flex; flex-direction: column; width: 100%;">
                 <h1 style="margin-top: 0;">General Settings</h1>
@@ -243,11 +244,16 @@ namespace Project.Models
         const config: string = message.config;
         const value: string | undefined = message.value ? message.value : undefined;
 
-        // Update the configuration value
-        await vscode.workspace.getConfiguration('csharp-bootstrapper').update(config, value);
-        
-        // Update html with the new values (That way you can navigate away from the WebView and come back and see the correct values)
-        this.setWebviewContent(webview, this.extensionUri);
+        if (config === 'general' || config === 'service' || config === 'controller' || config === 'frontend-service' || config === 'frontend-model'){
+          this.activeId = config;
+        }
+        else {
+          // Update the configuration value
+          await vscode.workspace.getConfiguration('csharp-bootstrapper').update(config, value);
+
+          // Update html with the new values
+          this.setWebviewContent(webview, this.extensionUri);
+        }
       },
       undefined,
       this.disposables
