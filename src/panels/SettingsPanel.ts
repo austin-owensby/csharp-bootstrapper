@@ -104,13 +104,20 @@ export class SettingsPanel {
     });
 
     // Generate the folder structure for the generated files
-    let frontendModelDir: string[] = vscode.workspace.getConfiguration().get<string>("csharp-bootstrapper.frontend.model.directory")?.split(/[/\\]+/) ?? [];
+    let frontendModelConfig: string | undefined = vscode.workspace.getConfiguration().get<string>("csharp-bootstrapper.frontend.model.directory");
+    let frontendModelDir: string[] = frontendModelConfig ? frontendModelConfig.split(/[/\\]+/) : [];
     frontendModelDir.push('Student.ts');
-    let controllerDir: string[] = vscode.workspace.getConfiguration().get<string>("csharp-bootstrapper.backend.controller.directory")?.split(/[/\\]+/) ?? [];
+
+    let controllerConfig: string | undefined = vscode.workspace.getConfiguration().get<string>("csharp-bootstrapper.backend.controller.directory");
+    let controllerDir: string[] = controllerConfig ? controllerConfig.split(/[/\\]+/) : [];
     controllerDir.push('StudentsController.cs');
-    let iserviceDir: string[] = vscode.workspace.getConfiguration().get<string>("csharp-bootstrapper.backend.service.interface.directory")?.split(/[/\\]+/) ?? [];
+
+    let interfaceServiceConfig: string | undefined = vscode.workspace.getConfiguration().get<string>("csharp-bootstrapper.backend.service.interface.directory");
+    let iserviceDir: string[] = interfaceServiceConfig ? interfaceServiceConfig.split(/[/\\]+/) : [];
     iserviceDir.push('IStudentService.cs');
-    let serviceDir: string[] = vscode.workspace.getConfiguration().get<string>("csharp-bootstrapper.backend.service.directory")?.split(/[/\\]+/) ?? [];
+
+    let serviceConfig: string | undefined = vscode.workspace.getConfiguration().get<string>("csharp-bootstrapper.backend.service.directory");
+    let serviceDir: string[] = serviceConfig ? serviceConfig.split(/[/\\]+/) : [];
     serviceDir.push('StudentService.cs');
 
     const paths: string[][] = new Array(frontendModelDir, controllerDir, iserviceDir, serviceDir);
