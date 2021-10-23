@@ -12,7 +12,10 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 - C# Context menu and Editor menu command to generate Typescript file template based off of C# model
 
 
-### 0.0.5
+## 0.0.5
  - Basic parsing of classes using Regex
  - Bootstrapping of Service, Service Interface, and Controller
  - Settings GUI
+
+## 0.0.6 - 0.0.7
+ - Fix path to webview javascript

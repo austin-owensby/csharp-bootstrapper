@@ -145,7 +145,7 @@ namespace Project.Models
       "toolkit.js",
     ]);
   
-    const mainUri = getUri(webview, extensionUri, ["src", "media","settingsGui.js"]);
+    const mainUri = getUri(webview, extensionUri, ["media","settingsGui.js"]);
 
     // Each input should have the class "config"
     // Also an id formatted similiar to the config section

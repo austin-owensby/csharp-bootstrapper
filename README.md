@@ -85,9 +85,12 @@ Initial testing of publishing the extension
 
 ### 0.0.1 - 0.0.4
 
-Scaffolding out of project. Added simple view and command to generate tpyescript template at a configured path.
+- Scaffolding out of project. Added simple view and command to generate tpyescript template at a configured path.
 
 ### 0.0.5
-Basic parsing of classes using Regex
-Bootstrapping of Service, Service Interface, and Controller
-Settings GUI
+- Basic parsing of classes using Regex
+- Bootstrapping of Service, Service Interface, and Controller
+- Settings GUI
+
+### 0.0.6 - 0.0.7
+- Fix path to webview javascript
