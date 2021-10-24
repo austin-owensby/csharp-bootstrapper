@@ -53,6 +53,114 @@ export function getPropertyString(type: CSharp.Type): string {
 	return result;
 }
 
+export function getPropertyStringTypescript(type: CSharp.Type): string {
+	// Takes in a CSharp Property object and produces a string with the correctly formatted property to use in a typescript
+	let result = '';
+
+	// Basic type
+	if (typeof type === "number") {
+		result += mapCSharpBasicTypeToTypescriptType(type as CSharp.BasicType);
+	}
+	// User defined type
+	else if (type.hasOwnProperty('name')) {
+		result += (type as CSharp.UserDefinedType).name;
+	}
+	// Collection
+	else if (type.hasOwnProperty('collectionType')) {
+		const lists: CSharp.CollectionType[] = [
+			CSharp.CollectionType.List,
+			CSharp.CollectionType.Collection,
+			CSharp.CollectionType.IList,
+			CSharp.CollectionType.ICollection,
+			CSharp.CollectionType.IEnumerable,
+		];
+
+		if (lists.includes((type as CSharp.Collection).collectionType as CSharp.CollectionType)){
+			result += `${getPropertyStringTypescript((type as CSharp.Collection).innerType)}[]`;
+		}
+		else if ((type as CSharp.Collection).collectionType as CSharp.CollectionType === CSharp.CollectionType.Dictionary){
+			result += `{ [key: ${getPropertyStringTypescript((type as CSharp.Collection).innerType)}]: any; }`; // TODO update when we handle multiple types in a collection
+		}
+		else{
+			result += 'any';
+		}
+	}
+
+	return result;
+}
+
+function mapCSharpBasicTypeToTypescriptType(type: CSharp.BasicType): string {
+	switch (type) {
+		case CSharp.BasicType.bool:
+		case CSharp.BasicType.Boolean:
+			return 'boolean';
+		case CSharp.BasicType.byte:
+		case CSharp.BasicType.Byte:
+		case CSharp.BasicType.sbyte:
+		case CSharp.BasicType.SByte:
+		case CSharp.BasicType.decimal:
+		case CSharp.BasicType.Decimal:
+		case CSharp.BasicType.double:
+		case CSharp.BasicType.Double:
+		case CSharp.BasicType.float:
+		case CSharp.BasicType.Single:
+		case CSharp.BasicType.int:
+		case CSharp.BasicType.Int32:
+		case CSharp.BasicType.uint:
+		case CSharp.BasicType.UInt32:
+		case CSharp.BasicType.nint:
+		case CSharp.BasicType.IntPtr:
+		case CSharp.BasicType.nuint:
+		case CSharp.BasicType.UIntPtr:
+		case CSharp.BasicType.long:
+		case CSharp.BasicType.Int64:
+		case CSharp.BasicType.ulong:
+		case CSharp.BasicType.UInt64:
+		case CSharp.BasicType.short:
+		case CSharp.BasicType.Int16:
+		case CSharp.BasicType.ushort:
+		case CSharp.BasicType.UInt16:
+		case CSharp.BasicType.Half:
+			return 'number';
+		case CSharp.BasicType.char:
+		case CSharp.BasicType.Char:
+		case CSharp.BasicType.string:
+		case CSharp.BasicType.String:
+		case CSharp.BasicType.DateTime:
+		case CSharp.BasicType.DateTimeOffset:
+		case CSharp.BasicType.TimeSpan:
+			return 'string';
+		case CSharp.BasicType.object:
+		case CSharp.BasicType.Object:
+		case CSharp.BasicType.dynamic:
+		default:
+			return 'any';
+	};
+}
+
+export function getPropertyDefaultValue(type: string): string {
+	switch (type){
+		case 'boolean':
+			return ' = false';
+		case 'number':
+			return ' = 0';
+		case 'string':
+			return ' = \'\'';
+		case 'any':
+			return '';
+		default:
+			if (type.endsWith('[]')){
+				return ' = []';
+			}
+			else if (type.startsWith('{ [key:')){
+				return ' = {}';
+			}
+			else {
+				return ` = new ${type}()`;
+			}
+	}
+}
+
 export function arrangeIntoTree(paths: string[][]): any[] {
     // Adapted from http://brandonclapp.com/arranging-an-array-of-flat-paths-into-a-json-tree-like-structure/
     let tree: any[] = [];

@@ -102,16 +102,13 @@ export namespace CSharp {
 		/* eslint-disable @typescript-eslint/naming-convention */
 		Dictionary,
 		List,
+		Collection,
 		IList,
 		ICollection,
-		Collection,
 		IEnumerable,
-		Enumerable,
 		Queue,
 		SortedList,
 		Stack,
-		ArrayList,
-		Hashtable,
 		/* eslint-disable @typescript-eslint/naming-convention */
 	}
 

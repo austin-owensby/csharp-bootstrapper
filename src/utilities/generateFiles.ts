@@ -1,6 +1,6 @@
 import * as pluralize from 'pluralize';
 import * as vscode from 'vscode';
-import { toLowerCase, addNamespace, getPropertyString } from './helpers';
+import { toLowerCase, addNamespace, getPropertyString, getPropertyStringTypescript, getPropertyDefaultValue } from './helpers';
 import { CSharp } from './csharp';
 
 export function generateTypescriptClass(parsedClass: CSharp.ParsedClass): string {
@@ -13,14 +13,20 @@ export function generateTypescriptClass(parsedClass: CSharp.ParsedClass): string
 
 	let fileContents: string = `export interface I${className} {\n`;
 
-
+	for (let property of parsedClass.properties){
+		let propertyString: string = getPropertyStringTypescript(property.type);
+		fileContents += `\t${toLowerCase(property.name)}: ${propertyString}${property.nullable ? ' | null' : ''};\n`;
+	}
 
 	fileContents += `}
 
 export class ${className}Dto implements I${className} {
 `;
 
-
+	for (let property of parsedClass.properties){
+		let propertyString: string = getPropertyStringTypescript(property.type);
+		fileContents += `\tpublic ${toLowerCase(property.name)}: ${propertyString}${property.nullable ? ' | null' : ''}${property.nullable ? ' = null' : getPropertyDefaultValue(propertyString)};\n`;
+	}
 
 	fileContents += `}
 
